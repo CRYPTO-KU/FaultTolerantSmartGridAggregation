@@ -1,3 +1,7 @@
+from typing import Optional
+
+from time import time as now
+
 from phe import paillier
 
 from data_concentrator import DataConcentrator as DC
@@ -15,6 +19,7 @@ class TestEnvironment:
         self._sm_addresses = sm_addresses
 
         # Timouts
+        self._test_start = None
         self._round_duration = round_duration
         self._phase_1_duration = phase_1_duration
         self._phase_2_duration = phase_2_duration
@@ -27,6 +32,10 @@ class TestEnvironment:
         self._pk = pk
         self._sk = sk
 
+        # Data Concentrator and Smart Meters will be created later
+        self._dc = None
+        self._sm = None
+
     @property
     def dc_address(self) -> str:
         return self._dc_address
@@ -34,6 +43,10 @@ class TestEnvironment:
     @property
     def sm_addresses(self) -> list[str]:
         return list(self._sm_addresses)
+
+    @property
+    def test_start(self) -> Optional[float]:
+        return self._test_start
 
     @property
     def round_duration(self) -> int:
@@ -58,3 +71,46 @@ class TestEnvironment:
     @property
     def secret_key(self) -> paillier.PaillierPrivateKey:
         return self._sk
+
+    @property
+    def dc(self) -> Optional[DC]:
+        return self._dc
+
+    @property
+    def sm(self) -> Optional[list[SM]]:
+        return self._sm
+
+    # Run test environment
+    def run(self) -> None:
+        # Record test start time
+        self._test_start = now()
+
+        # Create DC
+        self._dc = DC(
+            self.dc_address,
+            self.sm_addresses,
+            self.test_start,
+            self.round_duration,
+            self.phase_1_duration,
+            self.phase_2_duration,
+            self.public_key,
+            self.secret_key
+        )
+
+        # Create SMs
+        self._sm = [
+            SM(
+                address,
+                self.dc_address,
+                self.sm_addresses,
+                self.test_start,
+                self.round_duration,
+                self.public_key
+            )
+            for address in self.sm_addresses
+        ]
+
+        # Run DC and SMs
+        self.dc.run()
+        for sm in self.sm:
+            sm.run()
