@@ -9,20 +9,20 @@ from smart_meter import SmartMeter as SM
 
 class TestEnvironment:
 
-    def __init__(self, dc_address: str, sm_addresses: list[str],
-                 round_duration: int, phase_1_duration: int,
-                 phase_2_duration: int,
-                 key_len: int = paillier.DEFAULT_KEYSIZE):
+    def __init__(self, dc_address: str, sm_addresses: list[str], n_min: int,
+                 round_seconds: float, phase_1_seconds: float,
+                 phase_2_seconds: float, key_len: int = paillier.DEFAULT_KEYSIZE):
 
         # Addresses of environment devices
         self._dc_address = dc_address
         self._sm_addresses = sm_addresses
+        self._n_min = n_min
 
         # Timouts
-        self._test_start = None
-        self._round_duration = round_duration
-        self._phase_1_duration = phase_1_duration
-        self._phase_2_duration = phase_2_duration
+        self._t_epoch = None
+        self._t_round = round_seconds
+        self._t_phase_1 = phase_1_seconds
+        self._t_phase_2 = phase_2_seconds
 
         # Cryptographic keys length
         self._key_len = key_len
@@ -45,20 +45,24 @@ class TestEnvironment:
         return list(self._sm_addresses)
 
     @property
-    def test_start(self) -> Optional[float]:
-        return self._test_start
+    def n_min(self) -> int:
+        return self._n_min
 
     @property
-    def round_duration(self) -> int:
-        return self._round_duration
+    def epoch(self) -> Optional[float]:
+        return self._t_epoch
 
     @property
-    def phase_1_duration(self) -> int:
-        return self._phase_1_duration
+    def round_duration(self) -> float:
+        return self._t_round
 
     @property
-    def phase_2_duration(self) -> int:
-        return self._phase_2_duration
+    def phase_1_duration(self) -> float:
+        return self._t_phase_1
+
+    @property
+    def phase_2_duration(self) -> float:
+        return self._t_phase_2
 
     @property
     def key_length(self) -> int:
@@ -89,6 +93,7 @@ class TestEnvironment:
         self._dc = DC(
             self.dc_address,
             self.sm_addresses,
+            self.n_min,
             self.test_start,
             self.round_duration,
             self.phase_1_duration,
@@ -103,6 +108,7 @@ class TestEnvironment:
                 address,
                 self.dc_address,
                 self.sm_addresses,
+                self.n_min,
                 self.test_start,
                 self.round_duration,
                 self.public_key
