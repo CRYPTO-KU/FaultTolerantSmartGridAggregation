@@ -11,7 +11,7 @@ from types.phase import Phase
 from types.url import URL
 from typing import Any, Dict, List, Tuple
 
-class DataConcentrator(ABC):
+class DC(ABC):
     
     # Constructor
 
