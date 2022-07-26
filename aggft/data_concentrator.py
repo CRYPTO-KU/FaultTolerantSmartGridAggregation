@@ -110,14 +110,15 @@ class DC(ABC):
         self._update_phase()
         l_rem, data = await self._get_phase_1_server().run(
             timeout = self.phase_1_duration,
-            round = round
+            round = round,
+            n_min = self.n_min
         )
         s_init = self._generate_s_initial()
         # terminate round if not enough smart meters can participate
         if len(l_rem) < self.n_min:
             return
 
-        self._activate_smart_meter(l_rem, s_init)
+        await self._activate_smart_meter(l_rem, s_init)
         # Phase.FIRST -> Phase.SECOND
         self._update_phase()
         l_act, s_final = await self._get_phase_2_server().run(
@@ -157,11 +158,11 @@ class DC(ABC):
     ## Others
 
     @abstractmethod
-    def _generate_s_initial(self) -> int:
+    async def _activate_smart_meter(self, l_rem: SortedSet, s_init: int) -> None:
         pass
 
     @abstractmethod
-    def _activate_smart_meter(self, l_rem: SortedSet, s_init: int) -> None:
+    def _generate_s_initial(self) -> int:
         pass
 
     @abstractmethod

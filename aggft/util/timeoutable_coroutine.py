@@ -5,16 +5,16 @@ import asyncio
 T = TypeVar("T")
 
 class TimeoutableCoroutine(ABC, Generic[T]):
-    async def run(self, timeout: float, *args, **kwargs) -> T:
+    async def run(self, timeout: float, **kwargs) -> T:
         try:
-            return await asyncio.wait_for(self._coroutine(*args, **kwargs), timeout)
+            return await asyncio.wait_for(self._coroutine(**kwargs), timeout)
         except asyncio.TimeoutError:
-            return self._on_timeout()
+            return await self._on_timeout()
 
     @abstractmethod
-    async def _coroutine(self, *args, **kwargs) -> T:
+    async def _coroutine(self, **kwargs) -> T:
         pass
 
     @abstractmethod
-    def _on_timeout(self) -> T:
+    async def _on_timeout(self) -> T:
         pass
