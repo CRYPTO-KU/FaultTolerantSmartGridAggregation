@@ -3,6 +3,7 @@ from util import time
 import copy
 from typing import Any
 from sortedcontainers import SortedSet
+from util.timeoutable_coroutine import TimeoutableCoroutine
 
 from data_concentrator import DC
 from types.url import URL
@@ -33,13 +34,30 @@ class SM(ABC):
 
     ## Entry Point
 
+    @abstractmethod
+    def _get_server(self) -> TimeoutableCoroutine[Tuple[SortedSet, SortedSet, int]]:
+        pass
+
+    def time_until_next_round(self):
+        next_round_start = self.epoch + (self.current_round + 1) * self.round_duration
+        return time.remaining_until(next_round_start)
+
+    @abstractmethod
+    def _update_s(self, s: int, si: int) -> int:
+        pass
+
     async def run(self) -> None:
         while True:
-            next_round_start = self.epoch + (self.current_round + 1) * self.round_duration
-            await asyncio.sleep(time.remaining_until(next_round_start))
+            await asyncio.sleep(self.time_until_next_round())
             self._update_round()
             si = self._get_si(self.current_round)
             await self._initial_activation(self.current_round, si)
+            l_rem, l_act, s = await self._get_server().run(
+                timeout = self.time_until_next_round(),
+                round = round
+            )
+            s_new = self._update_s(s, si)
+            await self._final_activation(self.current_round, l_rem, l_act, s_new)
 
     # Getters
 
@@ -102,43 +120,33 @@ class SM(ABC):
         await self._send_msg_to_dc(initial_msg)
 
     @abstractmethod
-    def _get_middle_msg(self, round: int) -> Dict[str, Any]:
+    def _get_middle_msg(self, round: int, l_rem: SortedSet, l_act: SortedSet, s_current: int) -> Dict[str, Any]:
         pass
 
     @abstractmethod
-    def _get_final_msg(self, round: int) -> Dict[str, Any]:
+    def _get_final_msg(self, round: int, l_act: SortedSet, s: int) -> Dict[str, Any]:
         pass
-
-
 
     async def _final_activation(self, round: int, l_rem: SortedSet, l_act: SortedSet, s_current: int):
         l_act.add(self.id)
         l_rem.remove(self.id)
 
         for sm_i in copy.deepcopy(l_rem):
-            middle_msg = self._get_middle_msg(round)
             if self._is_last:
                 break
+            middle_msg = self._get_middle_msg(round, l_rem, l_act, s_current)
             is_success = await self._send_msg_to_sm(sm_i, middle_msg)
             if is_success:
                 return
             l_rem.remove(sm_i)
 
-        final_msg = self._get_final_msg(round)
+        final_msg = self._get_final_msg(round, l_act, s_current)
         await self._send_msg_to_dc(final_msg)
 
     def _update_round(self) -> None:
         self._round += 1
 
-    @abstractmethod
-    def send_initial_msg(self) -> Any:
-        pass
-
     # Protocol Implementation
-
-    @abstractmethod
-    async def _send_final_message(self, l_act: SortedSet, s_final: int) -> None:
-        pass
 
     def _is_last(self, l_rem: SortedSet, l_act: SortedSet):
         return len(l_rem) == 0 or len(l_rem) + len(l_act) < self.n_min
