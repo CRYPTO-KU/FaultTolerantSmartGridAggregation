@@ -108,15 +108,20 @@ class SM(ABC):
         return await self._send_msg(self.sm_addresses[id], data)
 
     @abstractmethod
+    def _get_data(self, round: int) -> Any:
+        pass
+
+    @abstractmethod
     def _get_si(self, round: int) -> int:
         pass
 
     @abstractmethod
-    def _get_initial_msg(self, round: int, si: int) -> Dict[str, Any]:
+    def _get_initial_msg(self, round: int, data: Any, si: int) -> Dict[str, Any]:
         pass
 
     async def _initial_activation(self, round: int, si: int):
-        initial_msg = self._get_initial_msg(round, si)
+        data = self._get_data(round)
+        initial_msg = self._get_initial_msg(round, data, si)
         await self._send_msg_to_dc(initial_msg)
 
     @abstractmethod
