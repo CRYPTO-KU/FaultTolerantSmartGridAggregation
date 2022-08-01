@@ -10,15 +10,7 @@ class MaskingDC(DC):
                  epoch_seconds: float, round_seconds: float,
                  phase_1_seconds: float, phase_2_seconds: float,
                  k: int):
-        super().__init__(
-            address,
-            sm_addresses,
-            n_min,
-            epoch_seconds,
-            round_seconds,
-            phase_1_seconds,
-            phase_2_seconds
-        )
+        super().__init__(address, sm_addresses, n_min, epoch_seconds, round_seconds, phase_1_seconds, phase_2_seconds)
         self._k = k
 
     # Public Interface
@@ -30,7 +22,7 @@ class MaskingDC(DC):
         return self._k
 
     def _generate_s_initial(self) -> int:
-        return secrets.randbelow(self.k)
+        return secrets.randbelow(self.k + 1)
 
     def _calculate_aggregate(self, data: Dict[int, Any], l_act: SortedSet, s_init: int, s_final: int) -> int:
         masked_measurements_sum = 0
