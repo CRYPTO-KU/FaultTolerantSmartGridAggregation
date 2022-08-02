@@ -15,7 +15,7 @@ class MaskingSM(SM):
         return self._k
 
     def _get_si(self, round: int) -> int:
-        return secrets.randbelow(self.k + 1)
+        return secrets.randbelow(self.k)
 
     def _update_s(self, s: int, si: int) -> int:
         return (s + si) % self.k

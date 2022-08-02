@@ -22,7 +22,7 @@ class MaskingDC(DC):
         return self._k
 
     def _generate_s_initial(self) -> int:
-        return secrets.randbelow(self.k + 1)
+        return secrets.randbelow(self.k)
 
     def _calculate_aggregate(self, data: Dict[int, Any], l_act: SortedSet, s_init: int, s_final: int) -> int:
         masked_measurements_sum = 0
