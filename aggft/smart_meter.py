@@ -35,7 +35,7 @@ class SM(ABC):
     ## Entry Point
 
     @abstractmethod
-    def _get_server(self) -> TimeoutableCoroutine[Tuple[SortedSet, SortedSet, int]]:
+    def _get_server(self) -> TimeoutableCoroutine[Tuple[bool, SortedSet, SortedSet, int]]:
         pass
 
     def time_until_next_round(self):
@@ -52,12 +52,13 @@ class SM(ABC):
             self._update_round()
             si = self._get_si(self.current_round)
             await self._initial_activation(self.current_round, si)
-            l_rem, l_act, s = await self._get_server().run(
+            ok, l_rem, l_act, s = await self._get_server().run(
                 timeout = self.time_until_next_round(),
                 round = round
             )
-            s_new = self._update_s(s, si)
-            await self._final_activation(self.current_round, l_rem, l_act, s_new)
+            if ok:
+                s_new = self._update_s(s, si)
+                await self._final_activation(self.current_round, l_rem, l_act, s_new)
 
     # Getters
 
