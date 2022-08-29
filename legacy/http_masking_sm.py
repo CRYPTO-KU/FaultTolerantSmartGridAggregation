@@ -1,7 +1,8 @@
-from masking_sm import MaskingSM
+import secrets
+from aggft.masking_sm import MaskingSM
 from typing import Any, Dict, List, Tuple
-from util.timeoutable_coroutine import TimeoutableCoroutine
-from types.url import URL
+from aggft.util.timeoutable_coroutine import TimeoutableCoroutine
+from aggft.types.url import URL
 from sortedcontainers import SortedSet
 from aiohttp import web
 import aiohttp
@@ -67,8 +68,12 @@ class HTTPMaskingSM(MaskingSM):
         return HTTPMaskingSMServer()
 
     async def _send_msg(self, to: str, data: Dict[str, Any]) -> bool:
+        print(to, data)
         async with aiohttp.ClientSession() as session:
+            print("yo")
             async with session.post(to, json = data) as response:
+                print("yo")
+                print("yo")
                 return response.status == 200
 
     def _get_initial_msg(self, round: int, data: Any, si: int) -> Dict[str, Any]:
@@ -92,3 +97,13 @@ class HTTPMaskingSM(MaskingSM):
             "listActivated": l_act,
             "sFinal": s
         }
+
+class TestHTTPMaskingSM(HTTPMaskingSM):
+    async def run(self) -> None:
+        print(f"TestHTTPMaskingSM {self.id}: run()")
+        return await super().run()
+
+    def _get_data(self, round: int) -> Any:
+        data =  secrets.randbelow(self.k)
+        print(f"Data for SM {self.id}: {data}")
+        return data

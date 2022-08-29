@@ -1,4 +1,4 @@
-from smart_meter import SM
+from aggft.smart_meter import SM
 import secrets
 from typing import Any, Dict, List, Tuple
 

@@ -29,3 +29,7 @@ class URL():
         Contains the host and the port.
         """
         return (self.host, self.port)
+        
+    @property
+    def to_str(self) -> str:
+        return f"{self.scheme}://{self.host}:{self.port}"

@@ -1,16 +1,16 @@
 import secrets
 
-from data_concentrator import DC
+from aggft.dc.base import BaseDC
 from sortedcontainers import SortedSet
 from typing import Any, Dict, List, Tuple
-from types.url import URL
+from aggft.types.url import URL
 
-class MaskingDC(DC):
-    def __init__(self, address: URL, sm_addresses: List[str], n_min: int,
+class MaskingDC(BaseDC):
+    def __init__(self, port: int, sm_addresses: List[str], n_min: int,
                  epoch_seconds: float, round_seconds: float,
                  phase_1_seconds: float, phase_2_seconds: float,
                  k: int):
-        super().__init__(address, sm_addresses, n_min, epoch_seconds, round_seconds, phase_1_seconds, phase_2_seconds)
+        super().__init__(port, sm_addresses, n_min, epoch_seconds, round_seconds, phase_1_seconds, phase_2_seconds)
         self._k = k
 
     # Public Interface

@@ -18,7 +18,7 @@
 			python = with pythonPkgs; {
 				build = [ flit ];
 				test = [ pytest pytest-asyncio ];
-				runtime = [ aiohttp phe sortedcontainers ];
+				runtime = [ aiohttp phe rich ];
 			};
 			other = with pkgs; {
 				build = [ ];

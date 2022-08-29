@@ -1,7 +1,7 @@
-from masking import MaskingDC
+from aggft.dc.masking import MaskingDC
 from typing import Any, Dict, List, Tuple
-from util.timeoutable_coroutine import TimeoutableCoroutine
-from types.url import URL
+from aggft.util.timeoutable_coroutine import TimeoutableCoroutine
+from aggft.types.url import URL
 from sortedcontainers import SortedSet
 from aiohttp import web
 import aiohttp
@@ -12,7 +12,7 @@ class HTTPMaskingDCPhase1Server(TimeoutableCoroutine[Tuple[SortedSet, Dict[int, 
         self.data = asyncio.Queue()
         self.runner: web.AppRunner
 
-    async def _coroutine(self, round: int, n_min: int, url: URL) -> Tuple[SortedSet, Dict[int, Any]]:
+    async def _coroutine(self, round: int, n_min: int, port: int) -> Tuple[SortedSet, Dict[int, Any]]:
         async def handler(request: web.Request) -> web.Response:
             # Insure the request has a readable body
             if not (request.body_exists and request.can_read_body):
@@ -44,13 +44,11 @@ class HTTPMaskingDCPhase1Server(TimeoutableCoroutine[Tuple[SortedSet, Dict[int, 
         app.add_routes([web.post("/phase-1", handler)])
         self.runner = web.AppRunner(app)
         await self.runner.setup()
-        site = web.TCPSite(self.runner, "localhost", url.port)
+        site = web.TCPSite(self.runner, "localhost", port)
         await site.start()
 
         while True:
             await asyncio.sleep(1000)
-            if self.data.qsize == n_min:
-                return await self.return_result()
 
     async def _on_timeout(self) -> Tuple[SortedSet, Dict[int, Any]]:
         return await self.return_result()
@@ -71,7 +69,7 @@ class HTTPMaskingDCPhase2Server(TimeoutableCoroutine[Tuple[SortedSet, int]]):
         self.s_final: int
         self.runner: web.AppRunner
 
-    async def _coroutine(self, round: int, url: URL) -> Tuple[SortedSet, int]:
+    async def _coroutine(self, round: int, port: int) -> Tuple[SortedSet, int]:
         async def handler(request: web.Request) -> web.Response:
             # Only accept one request in the second phase
             if self.l_act:
@@ -103,7 +101,7 @@ class HTTPMaskingDCPhase2Server(TimeoutableCoroutine[Tuple[SortedSet, int]]):
         app.add_routes([web.post("/phase-2", handler)])
         self.runner = web.AppRunner(app)
         await self.runner.setup()
-        site = web.TCPSite(self.runner, "localhost", url.port)
+        site = web.TCPSite(self.runner, "localhost", port)
         await site.start()
 
         while True:
