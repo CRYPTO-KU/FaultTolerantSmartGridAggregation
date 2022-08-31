@@ -1,4 +1,8 @@
 from time import time as now
 
-def remaining_until(time: float):
+# Types
+
+Time = float
+
+def remaining_until(time: Time):
     return max(time - now(), 0)
