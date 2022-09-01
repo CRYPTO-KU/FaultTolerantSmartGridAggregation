@@ -1,20 +1,26 @@
-import json
+# Standard Library Imports
+
 import re
 import selectors
 import socket
 
+from time import time as now
 from uuid import uuid4
 
-import log
+# Project Imports
+
+from . import log
+
+# Standard Library Type Imports
 
 from dataclasses import dataclass
 from typing import Callable, Tuple
 from uuid import UUID
+from enum import Enum
 
-# TODO: Remove
-from time import time as now
-# from .time import Time
+# Project Type Imports
 
+from .time import Time
 
 # Types
 
@@ -32,26 +38,21 @@ class _CONNECTION_SOCKET:
     address: Address
     data: str = ""
 
+class _STATE(Enum):
+    IN_PROGRESS = 0
+    SUCCESS = 1
+    FAILED = 2
+
 # Constants
 
 LOCALHOST = "localhost"
-
-# def listen_to_json_once(port: PORT, timeout: float, start_marker: str, end_marker: str) -> Tuple[bool, dict]:
-#     ok, data = listen_once(port, timeout, start_marker, end_marker)
-#     if not ok:
-#         return (False, {})
-#     try:
-#         json_data = json.loads(data)
-#         return (True, json_data)
-#     except json.JSONDecodeError:
-#         return (False, {})
+MEGA_BYTE = 8192
 
 def listen_multiple(
-    port: Port, stop_no_later_than: float, # TODO: Use Time
+    port: Port, stop_no_later_than: Time,
     start_marker: str, end_marker: str,
-    validator: Callable[[str], bool] = lambda _ : True,
-    early_stoper: Callable[[Tuple[str, ...]], bool] = lambda _ : False
-):
+    early_stopper: Callable[[Tuple[str, ...]], bool] = lambda _: False
+) -> Tuple[str, ...]:
     selector = selectors.DefaultSelector()
 
     listening_id = uuid4()
@@ -66,22 +67,34 @@ def listen_multiple(
     )
     log.info(f"[{listening_id}] Listening on port: {port}.")
 
+    results = ()
+
     while True:
-        if now() > stop_no_later_than:
-            break
+        if now() > stop_no_later_than: break
         # Setting timeout to zero makes it non-blocking
         events = selector.select(timeout = 0)
-        for key, mask in events:
-            if isinstance(key.data, _LISTENING_SOCKET):
-                accept_connection(key.fileobj, key.data.id, selector)
+        should_early_stop = False
+        for key, masks in events:
+            if now() > stop_no_later_than: break
+            elif isinstance(key.data, _LISTENING_SOCKET):
+                accept_connection(key, selector)
             elif isinstance(key.data, _CONNECTION_SOCKET):
-                pass
-                # service_connection(key, mask)
+                state = handle_connection(key, masks, selector, start_marker, end_marker)
+                if state == _STATE.SUCCESS:
+                    results = (*results, key.data.data)
+                    should_early_stop = early_stopper(results)
+                    if should_early_stop:
+                        log.info(f"[{listening_id}] Early stopping...")
+                        break
+        if should_early_stop: break
 
     log.info(f"[{listening_id}] Stop listining on port: {port}.")
     selector.close()
+    return results
 
-def accept_connection(socket: socket.socket, listening_id: UUID, selector: selectors.DefaultSelector):
+def accept_connection(key: selectors.SelectorKey, selector: selectors.DefaultSelector):
+    socket = key.fileobj
+    listening_id = key.data.id
     # Socket should be ready to read immediately
     connection, address = socket.accept()
     connection.setblocking(False)
@@ -93,49 +106,33 @@ def accept_connection(socket: socket.socket, listening_id: UUID, selector: selec
     )
     log.info(f"[{listening_id}] Accepted connection [{connection_id}] from: {address}.")
 
-# def handle_connection(key, mask):
-#     sock = key.fileobj
-#     data = key.data
-#     if mask & selectors.EVENT_READ:
-#         recv_data = sock.recv(1024)  # Should be ready to read
-#         if recv_data:
-#             data.outb += recv_data
-#         else:
-#             print(f"Closing connection to {data.addr}")
-#             sel.unregister(sock)
-#             sock.close()
-#     if mask & selectors.EVENT_WRITE:
-#         if data.outb:
-#             print(f"Echoing {data.outb!r} to {data.addr}")
-#             sent = sock.send(data.outb)  # Should be ready to write
-#             data.outb = data.outb[sent:]
+def handle_connection(key: selectors.SelectorKey, masks: int, selector: selectors.DefaultSelector, start_marker: str, end_marker: str) -> _STATE:
+    masks_include = lambda masks, event: masks & event
+    socket = key.fileobj
+    socket_data = key.data
+    if masks_include(masks, selectors.EVENT_READ):
+        # Socket should be ready to read immediately
+        chunk = socket.recv(MEGA_BYTE)
+        socket_data.data = f"{socket_data.data}{chunk}"
 
-# def listen_once(port: PORT, timeout: float, start_marker: str, end_marker: str) -> Tuple[bool, str]:
-#     print(f"Started at {now()}")
-#     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-#         s.bind(("localhost", port))
-#         s.listen()
-#         s.settimeout(timeout)
-#         try:
-#             connection, _ = s.accept()
-#             connection.settimeout(timeout)
-#             print(f"Connected at {now()}")
-#             with connection:
-#                 data = receive_all(connection, start_marker, end_marker)
-#                 connection.sendall(str.encode(f"{start_marker}ACK{end_marker}"))
-#                 return (True, data)
-#                 
-#         except socket.timeout:
-#             print(f"Timed out at {now()}")
-#             return (False, "")
-#
-# def receive_all(connection: socket.socket, start_marker: str, end_marker: str) -> str:
-#     MB = 8192
-#     data = ""
-#     while True:
-#         chunk = connection.recv(MB)
-#         print(f"Received chunk at {now()}")
-#         data = f"{data}{chunk}"
-#         match = re.search(f"{start_marker}(?P<msg>.*){end_marker}", data)
-#         if match is not None:
-#             return match.group("msg")
+        match = re.search(f"{start_marker}(?P<msg>.*){end_marker}", socket_data.data)
+
+        if not chunk:
+            log.info(f"[{socket_data.id}] No chunk received. Aborting connection to {socket_data.address}...")
+            selector.unregister(socket)
+            socket.close()
+            return _STATE.FAILED
+
+        if match is not None:
+            socket_data.data = match.group("msg")
+            log.info(f"[{socket_data.id}] Received all data. Closing connection to {socket_data.address}...")
+            if masks_include(masks, selectors.EVENT_WRITE):
+                # Socket should be ready to write immediately
+                socket.sendall(str.encode(f"{start_marker}ACK{end_marker}"))
+            selector.unregister(socket)
+            socket.close()
+            return _STATE.SUCCESS
+        
+        log.info(f"[{socket_data.id}] Received chunk.")
+
+    return _STATE.IN_PROGRESS
