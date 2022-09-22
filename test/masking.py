@@ -1,15 +1,21 @@
+# Standard Library Imports
+
+import threading
+
+from os import urandom
+from random import randint as random_int
+from time import time as now
+
+# Project Imports
+
 from aggft.dc import tcp_masking as dc
 from aggft.sm import tcp_masking as sm
 
-from time import time as now
-import os
-from typing import Tuple
-
-import random
-
 from aggft.model.round import RoundMetadata
 
-import threading
+# Standard Library Type Imports
+
+from typing import Tuple
 
 SM_COUNT = 2
 K = int(2e20)

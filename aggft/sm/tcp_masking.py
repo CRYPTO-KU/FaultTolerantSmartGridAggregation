@@ -4,7 +4,6 @@ import json
 import secrets
 
 from time import sleep
-from time import time as now
 
 # Project Imports
 
@@ -15,7 +14,7 @@ from ..util import time
 
 # Standard Library Type Imports
 
-from typing import Dict, Tuple
+from typing import Tuple
 
 # Project Type Imports
 
