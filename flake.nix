@@ -1,5 +1,5 @@
 {
-	description = "YouTube Music Downloader";
+	description = "AggFT Algorithm Implementation";
 
 	inputs = {
 		nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
