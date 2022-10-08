@@ -21,23 +21,33 @@ from typing import Dict, Tuple
 
 from ..model.round import RoundMetadata
 
-def run_forever(port: network.Port, sm_addresses: Tuple[network.Address, ...], meta: RoundMetadata, k: int, prf_key: bytes):
+def run_forever(port: network.Port, sm_addresses: Tuple[Tuple[network.Address, bool], ...], meta: RoundMetadata, k: int, prf_key: bytes, test: Dict):
     # Wait for the right time to start operation
     log.info("Waiting for operation start...")
     sleep(time.remaining_until(meta.start))
     log.info("Operation started.")
     log.info(f"Round {0} started.")
-    run_single_round(0, port, sm_addresses, meta, k, prf_key)
+    run_single_round(0, port, sm_addresses, meta, k, prf_key, test)
     log.info(f"Round {0} ended.")
 
-def run_single_round(round: int, port: network.Port, sm_addresses: Tuple[network.Address, ...], meta: RoundMetadata, k: int, prf_key: bytes):
+def run_single_round(round: int, port: network.Port, sm_addresses: Tuple[Tuple[network.Address, bool], ...], meta: RoundMetadata, k: int, prf_key: bytes, test: Dict):
     # Wait for the right time to start round
     round_start = meta.start + meta.round_len * round
     sleep(time.remaining_until(round_start))
+    test["start"] = now()
+    test["terminated"] = False
+    test["n_min_reached"] = False
+    test["success"] = False
     data, prfs, l_rem = run_phase_1(round, port, sm_addresses, meta, prf_key)
+    test["phase_1_count"] = len(l_rem)
+    test["phase_2_count"] = 0
     if len(l_rem) < meta.n_min:
         log.warning(f"[round {round}] {len(l_rem)} out of {meta.n_min} required smart meters participated in phase 1. Aborting round...")
+        test["end"] = now()
+        test["duration"] = test["end"] - test["start"]
+        test["terminated"] = True
         return
+    test["n_min_reached"] = True
     log.info(f"[round {round}] [phase 1] {len(l_rem)} smart meters participated in phase 1.")
     log.info(f"[round {round}] [phase 1] Data: {data}")
     s_initial = secrets.randbelow(k)
@@ -45,15 +55,18 @@ def run_single_round(round: int, port: network.Port, sm_addresses: Tuple[network
     activated = activate_first_sm(round, sm_addresses, meta, s_initial, l_rem)
     if not activated:
         log.warning(f"[round {round}] Could not activate first smart meter. Aborting round...")
-        pass
+        test["end"] = now()
+        test["duration"] = test["end"] - test["start"]
+        test["terminated"] = True
+        return
     log.success(f"[round {round}] Activated first smart meter.")
-    run_phase_2(round, port, sm_addresses, meta, k, data, s_initial, prfs)
+    run_phase_2(round, port, sm_addresses, meta, k, data, s_initial, prfs, test)
 
-def run_phase_1(round: int, port: network.Port, sm_addresses: Tuple[network.Address, ...], meta: RoundMetadata, prf_key: bytes) -> Tuple[Dict, Dict, Tuple[int, ...]]:
+def run_phase_1(round: int, port: network.Port, sm_addresses: Tuple[Tuple[network.Address, bool], ...], meta: RoundMetadata, prf_key: bytes) -> Tuple[Dict, Dict, Tuple[int, ...]]:
     round_start = meta.start + meta.round_len * round
     phase_1_end = round_start + meta.phase_1_len
-    requests = network.listen_multiple(port, phase_1_end, "<START>", "<END>", phase_1_early_stopper(round, sm_addresses))
-    validator = phase_1_request_validator(round, sm_addresses)
+    requests = network.listen_multiple(port, phase_1_end, "<START>", "<END>", phase_1_early_stopper(round, tuple(map(lambda address: address[0], sm_addresses))))
+    validator = phase_1_request_validator(round, tuple(map(lambda address: address[0], sm_addresses)))
     valid_requests = map(json.loads, filter(validator, requests))
     data = {}
     prfs = {}
@@ -64,26 +77,35 @@ def run_phase_1(round: int, port: network.Port, sm_addresses: Tuple[network.Addr
         l_rem.append(r["id"])
     return data, prfs, tuple(sorted(l_rem))
 
-def run_phase_2(round: int, port: network.Port, sm_addresses: Tuple[network.Address, ...], meta: RoundMetadata, k: int, data: Dict, s_initial: int, prfs: Dict):
+def run_phase_2(round: int, port: network.Port, sm_addresses: Tuple[Tuple[network.Address, bool], ...], meta: RoundMetadata, k: int, data: Dict, s_initial: int, prfs: Dict, test: Dict):
     round_start = meta.start + meta.round_len * round
     phase_2_end = round_start + meta.round_len
-    requests = network.listen_multiple(port, phase_2_end, "<START>", "<END>", phase_2_early_stopper(round, sm_addresses))
-    validator = phase_2_request_validator(round, sm_addresses)
+    requests = network.listen_multiple(port, phase_2_end, "<START>", "<END>", phase_2_early_stopper(round, tuple(map(lambda address: address[0], sm_addresses))))
+    validator = phase_2_request_validator(round, tuple(map(lambda address: address[0], sm_addresses)))
     valid_requests = list(map(json.loads, filter(validator, requests)))
-    if len(valid_requests) == 0: return
+    test["terminated"] = True
+    if len(valid_requests) == 0:
+        test["end"] = now()
+        test["duration"] = test["end"] - test["start"]
+        return
     final_data = valid_requests[0]
     
     masked_sum = sum(map(lambda id: data[id], final_data["l_act"]))
     prfs_l_act = sum(map(lambda id: prfs[id], final_data["l_act"]))
     aggregate = (masked_sum - (final_data["s"] - s_initial) - prfs_l_act) % k
     log.success(f"Round {round} aggregate: {aggregate}.")
+    test["end"] = now()
+    test["duration"] = test["end"] - test["start"]
+    test["success"] = True
+    test["phase_2_count"] = len(final_data["l_act"])
 
-def activate_first_sm(round: int, sm_addresses: Tuple[network.Address, ...], meta: RoundMetadata, s_initial: int, l_rem: Tuple[int, ...]) -> bool:
+def activate_first_sm(round: int, sm_addresses: Tuple[Tuple[network.Address, bool], ...], meta: RoundMetadata, s_initial: int, l_rem: Tuple[int, ...]) -> bool:
     data = { "round": round, "s": s_initial, "l_rem": l_rem, "l_act": [] }
     round_start = meta.start + meta.round_len * round
     phase_2_end = round_start + meta.round_len
     for address in sm_addresses:
-        is_ok = network.send(address, json.dumps(data), phase_2_end, "<START>", "<END>")
+        if not address[1]: continue
+        is_ok = network.send(address[0], json.dumps(data), phase_2_end, "<START>", "<END>")
         if is_ok:
             return True
     return False

@@ -88,7 +88,9 @@ def listen_multiple(
                     if should_early_stop:
                         log.info(f"[{listening_id}] Early stopping...")
                         break
-        if should_early_stop: break
+        if should_early_stop:
+            log.info(f"[{listening_id}] Early stopping...")
+            break
 
     log.info(f"[{listening_id}] Stop listining on port: {port}.")
     selector.close()
