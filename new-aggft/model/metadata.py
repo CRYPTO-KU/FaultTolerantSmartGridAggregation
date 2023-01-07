@@ -45,12 +45,18 @@ class Metadata:
     t_phase_1_len: float
 
 # AggFT Rounds Metadata
-# Specific for using masking
+# Specific for using masking.
+# Base class for the DC and SM versions.
+# Don't use directly.
 @dataclass(frozen = True)
 class MaskingMetadata(Metadata):
     # TODO: Document this variable
-    k       : int
+    k: int
 
+# AggFT Rounds Metadata
+# Specific for a DC using masking.
+@dataclass(frozen = True)
+class DCMaskingMetadata(MaskingMetadata):
     # Pre-shared PRF Keys
     # The smart meters add a round-dependent pseudo-random number produced by a
     # Pseudo-Random Function (PRF) that is computable by the smart meters and
@@ -58,6 +64,13 @@ class MaskingMetadata(Metadata):
     # This makes a privacy breach more difficult for eavesdroppers but does not
     # prevent the computation of the sum.
     prf_keys: Tuple[bytes, ...]
+
+# AggFT Rounds Metadata
+# Specific for an SM using masking.
+@dataclass(frozen = True)
+class SMMaskingMetadata(MaskingMetadata):
+    # Pre-shared PRF Key
+    prf_key: bytes
 
 ################################################################################
 # Data Validation
@@ -92,8 +105,19 @@ def is_valid_masking_metadata(m: MaskingMetadata) -> bool:
     if m.k <= 1:
         return False
 
+    return True
+
+def is_valid_dc_masking_metadata(m: DCMaskingMetadata) -> bool:
+    # Should be a valid masking metadata
+    if not is_valid_masking_metadata(m):
+        return False
+
     # Should have one pre-shared key per smart meter
     if len(m.prf_keys) != len(m.sm_addresses):
         return False
 
     return True
+
+def is_valid_sm_masking_metadata(m: SMMaskingMetadata) -> bool:
+    # Should be a valid masking metadata
+    return is_valid_masking_metadata(m)
