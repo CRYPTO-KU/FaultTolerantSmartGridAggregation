@@ -22,10 +22,10 @@ class Metadata:
     mode         : AGGFT_MODE
 
     # Data Concentrator (DC) Address
-    dc_address   : Tuple[network.Address, bool]
+    dc_address   : network.Address
 
     # Smart Meters (SMs) Addresses
-    sm_addresses : Tuple[Tuple[network.Address, bool], ...]
+    sm_addresses : Tuple[network.Address, ...]
 
     # Minimum Number Of Contributing Smart Meters
     # The information needed to recover the aggregate is only sent, if at least

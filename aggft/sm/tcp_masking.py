@@ -51,11 +51,15 @@ def run_single_round(round: int, port: network.Port, dc_address: Tuple[network.A
     test["duration"] = test["end"] - test["start"]
     
 def run_phase_1(round: int, dc_address: Tuple[network.Address, bool], id: int, meta: RoundMetadata, k: int, s: int, p: int) -> bool:
+    # NOTE: [computation] start recording
     round_start = meta.start + meta.round_len * round
     phase_1_end = round_start + meta.phase_1_len
     masked = (get_raw_measurement(round) + s + p) % k
     data = { "id": id, "round": round, "data": masked }
+    # NOTE: [computation] end recording
+    # NOTE: [net] start recording
     return network.send(dc_address[0], json.dumps(data), phase_1_end, "<START>", "<END>") if dc_address[1] else False
+    # NOTE: [net] end recording
 
 # TODO: Don't use a constant
 def get_raw_measurement(round: int):
@@ -69,10 +73,13 @@ def run_phase_2(round: int, port: network.Port, dc_address: Tuple[network.Addres
     valid_requests = list(map(json.loads, filter(validator, requests)))
     if len(valid_requests) == 0: return False
     log.info(f"[round {round}] [phase 2] Got activated.")
+    # NOTE: [computation] start recording
     data = valid_requests[0]
     l_rem = tuple(filter(lambda rem: rem != id, data["l_rem"]))
     l_act = (*data["l_act"], id)
     s_new = (s + data["s"]) % k
+    # NOTE: [computation] end recording
+    # NOTE: [net] start recording
     while not is_last(l_rem, l_act, meta.n_min):
         if time.remaining_until(phase_2_end) == 0: return
         next_sm = l_rem[0]
@@ -97,6 +104,7 @@ def run_phase_2(round: int, port: network.Port, dc_address: Tuple[network.Addres
                 phase_2_end,
                 "<START>", "<END>"
             )
+    # NOTE: [net] end recording
 
 def is_last(l_rem: Tuple[int, ...], l_act: Tuple[int, ...], n_min: int) -> bool:
     return len(l_rem) == 0 or len(l_rem) + len(l_act) < n_min
