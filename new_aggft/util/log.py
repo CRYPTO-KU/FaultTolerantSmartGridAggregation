@@ -4,7 +4,7 @@ from rich.console import Console
 from rich.markup  import escape
 
 ################################################################################
-# Internal Helpers
+# Private Internals
 ################################################################################
 
 _console = Console()
