@@ -4,6 +4,6 @@
 
 - Remove legacey code.
 - Fix legacy directory structure.
-- Implement TCPNetworkManager.
+- Implement `TCPNetworkManager`.
 - Implement Homomorphic Encryption.
 - Improve testing code.
