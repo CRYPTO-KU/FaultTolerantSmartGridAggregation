@@ -11,11 +11,13 @@ from .util           import time
 
 from typing          import Dict, Tuple
 
-from .model.metadata import SMMaskingMetadata
+from .model.metadata import SMMaskingMetadata, is_valid_sm_masking_metadata
 from .model.report   import SMReport
 
 class SM():
     def __init__(self, id: int, meta: SMMaskingMetadata, net_mngr: NetworkManager):
+        if not is_valid_sm_masking_metadata(meta):
+            raise ValueError("Invalid smart meter masking metadata.")
         self.id       = id
         self.meta     = meta
         self.net_mngr = net_mngr
