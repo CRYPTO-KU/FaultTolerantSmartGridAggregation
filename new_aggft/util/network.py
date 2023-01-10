@@ -1,10 +1,14 @@
+import json
+
 from dataclasses import dataclass
 from queue       import Queue
 
 from abc         import ABC, abstractmethod
 from typing      import Dict, Tuple
 
-import json
+################################################################################
+# Data Types
+################################################################################
 
 Host = str
 Port = int
@@ -14,6 +18,10 @@ class Address:
     host : Host
     port : Port
     valid: bool
+
+################################################################################
+# Actual Networking
+################################################################################
 
 # Keywords that mark the beginning and ending of a network request
 _DATA_BEG_MARK = "<BEG>"
@@ -31,6 +39,10 @@ class NetworkManager(ABC):
     @abstractmethod
     def listen(self) -> None:
         pass
+
+################################################################################
+# Shared Memory Networking
+################################################################################
 
 class SharedMemoryNetworkManager(NetworkManager):
     def __init__(self, address: Address, registry: Dict[Tuple[Host, Port], Queue]):
