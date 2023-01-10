@@ -50,7 +50,8 @@ class Metadata:
 # Don't use directly.
 @dataclass(frozen = True)
 class MaskingMetadata(Metadata):
-    # TODO: Document this variable
+    # Group Modulus
+    #  We generate mask values to within the group.
     k: int
 
 # AggFT Rounds Metadata
