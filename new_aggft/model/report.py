@@ -4,6 +4,9 @@ from dataclasses import dataclass
 # Data Types
 ################################################################################
 
+# Data Concentrator (DC) Report
+# DC generates such a report each round.
+# Contains useful metrics about the round from the perspective of the DC.
 @dataclass
 class DCReport:
     t_start      : float = 0
@@ -15,6 +18,9 @@ class DCReport:
     net_rcv      : int   = 0
     net_snd      : int   = 0
 
+# Smart Meter (SM) Report
+# SM generates such a report each round.
+# Contains useful metrics about the round from the perspective of the SM.
 @dataclass
 class SMReport:
     t_start: float = 0
