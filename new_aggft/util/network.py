@@ -20,24 +20,20 @@ class Address:
     valid: bool
 
 ################################################################################
-# Actual Networking
+# Abstract Network Manager
 ################################################################################
 
-# Keywords that mark the beginning and ending of a network request
-_DATA_BEG_MARK = "<BEG>"
-_DATA_END_MARK = "<END>"
-
 class NetworkManager(ABC):
-    @abstractmethod
-    def bind(self, address: Address) -> Queue:
-        pass
-
     @abstractmethod
     def send(self, address: Address, data: str, timeout: float) -> bool:
         pass
 
     @abstractmethod
-    def listen(self) -> None:
+    def listen(self, address: Address) -> Queue:
+        pass
+
+    @abstractmethod
+    def stop(self) -> None:
         pass
 
 ################################################################################
@@ -45,12 +41,8 @@ class NetworkManager(ABC):
 ################################################################################
 
 class SharedMemoryNetworkManager(NetworkManager):
-    def __init__(self, address: Address, registry: Dict[Tuple[Host, Port], Queue]):
-        self.address  = address
+    def __init__(self, registry: Dict[Tuple[Host, Port], Queue]):
         self.registry = registry
-
-    def bind(self, _):
-        return
 
     def send(self, address: Address, data: str, _) -> bool:
         if address.valid:
@@ -58,5 +50,32 @@ class SharedMemoryNetworkManager(NetworkManager):
             return True
         return False
 
-    def listen(self) -> Queue:
-        return self.registry[(self.address.host, self.address.port)]
+    def listen(self, address: Address) -> Queue:
+        return self.registry[(address.host, address.port)]
+        
+    def stop(self) -> None:
+        pass
+
+################################################################################
+# TCP Networking
+################################################################################
+
+# Keywords that mark the beginning and ending of a network request
+_DATA_BEG_MARK = "<BEG>"
+_DATA_END_MARK = "<END>"
+
+class TCPNetworkManager(NetworkManager):
+    def __init__(self, registry: Dict[Tuple[Host, Port], Queue]):
+        self.registry = registry
+
+    def send(self, address: Address, data: str, _) -> bool:
+        if address.valid:
+            self.registry[(address.host, address.port)].put(json.loads(data))
+            return True
+        return False
+
+    def listen(self, address: Address) -> Queue:
+        return self.registry[(address.host, address.port)]
+        
+    def stop(self) -> None:
+        pass

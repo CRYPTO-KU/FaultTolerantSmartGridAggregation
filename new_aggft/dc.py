@@ -23,7 +23,7 @@ class DC():
         self.reports  = []
 
     def run_forever(self):
-        self._bind()
+        self._listen()
 
         # Wait for the right time to start operation
         log.info("Waiting for operation start...")
@@ -38,7 +38,7 @@ class DC():
             round += 1
             
     def run_once(self):
-        self._bind()
+        self._listen()
 
         # Wait for the right time to start operation
         log.info("Waiting for operation start...")
@@ -49,11 +49,15 @@ class DC():
         self._run_single_round(0)
         log.info(f"Round ended.")
 
-    def _bind(self):
-        # Bind to port
-        self.net_mngr.bind(self.meta.dc_address)
+        self._stop()
+
+    def _listen(self):
         # Start listening to incoming requests
-        self.req_q = self.net_mngr.listen()
+        self.req_q = self.net_mngr.listen(self.meta.dc_address)
+
+    def _stop(self):
+        # Stop listening to incoming requests
+        self.net_mngr.stop()
 
     def _run_single_round(self, round: int):
         # Wait for the right time to start round

@@ -24,7 +24,7 @@ SM_COUNT         = 2
 K                = int(2e20)
 PORT_LOWER_BOUND = 55555
 PORT_UPPER_BOUND = 65535
-N_MIN            = 1
+N_MIN            = 2
 STARTUP_WAIT     = 0.1
 ROUND_LEN        = 4
 PHASE_1_LEN      = 2
@@ -81,7 +81,7 @@ def dc_factory(test_start: float, registry: Dict[Tuple[network.Host, network.Por
     )
 
     # Create network manager
-    net_mngr = network.SharedMemoryNetworkManager(dc_addr, registry)
+    net_mngr = network.SharedMemoryNetworkManager(registry)
 
     return DC(meta, net_mngr)
 
@@ -106,7 +106,7 @@ def sm_factory(id: int, test_start: float, registry: Dict[Tuple[network.Host, ne
     )
 
     # Create network manager
-    net_mngr = network.SharedMemoryNetworkManager(sm_addr[id], registry)
+    net_mngr = network.SharedMemoryNetworkManager(registry)
 
     return SM(id, meta, net_mngr)
 
