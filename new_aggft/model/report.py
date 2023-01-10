@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 @dataclass
 class DCReport:
-    t_start      : float
+    t_start      : float = 0
     t_end        : float = 0
     terminated   : bool  = False
     success      : bool  = False
@@ -17,7 +17,7 @@ class DCReport:
 
 @dataclass
 class SMReport:
-    t_start: float
+    t_start: float = 0
     t_end  : float = 0
     net_rcv: int   = 0
     net_snd: int   = 0
