@@ -11,9 +11,9 @@
 		pkgs = import nixpkgs { inherit system; };
 
 		pythonEnv = pkgs.python3.withPackages (pythonPkgs: with pythonPkgs; [
+			aiohttp
 			phe
 			pyaes
-			requests
 			rich 
 		]);
 	in {
