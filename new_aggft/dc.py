@@ -133,7 +133,7 @@ class DC():
         for address in self.meta.sm_addresses:
             if not address.valid: continue
             self.reports[round].net_snd += 1
-            ok = self.net_mngr.send(address, json.dumps(data), phase_2_end)
+            ok = self.net_mngr.send(address, data, phase_2_end)
             if ok: return True
         return False
 

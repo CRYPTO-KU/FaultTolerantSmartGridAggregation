@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from queue       import Queue
 
 from abc         import ABC, abstractmethod
-from typing      import Dict, Tuple
+from typing      import Any, Dict, Tuple
 
 ################################################################################
 # Data Types
@@ -25,7 +25,7 @@ class Address:
 
 class NetworkManager(ABC):
     @abstractmethod
-    def send(self, address: Address, data: str, timeout: float) -> bool:
+    def send(self, address: Address, data: Dict[str, Any], timeout: float) -> bool:
         pass
 
     @abstractmethod
@@ -44,9 +44,9 @@ class SharedMemoryNetworkManager(NetworkManager):
     def __init__(self, registry: Dict[Tuple[Host, Port], Queue]):
         self.registry = registry
 
-    def send(self, address: Address, data: str, _) -> bool:
+    def send(self, address: Address, data: Dict[str, Any], _) -> bool:
         if address.valid:
-            self.registry[(address.host, address.port)].put(json.loads(data))
+            self.registry[(address.host, address.port)].put(json.loads(json.dumps(data)))
             return True
         return False
 
@@ -68,9 +68,9 @@ class TCPNetworkManager(NetworkManager):
     def __init__(self, registry: Dict[Tuple[Host, Port], Queue]):
         self.registry = registry
 
-    def send(self, address: Address, data: str, _) -> bool:
+    def send(self, address: Address, data: Dict[str, Any], _) -> bool:
         if address.valid:
-            self.registry[(address.host, address.port)].put(json.loads(data))
+            self.registry[(address.host, address.port)].put(json.loads(json.dumps(data)))
             return True
         return False
 

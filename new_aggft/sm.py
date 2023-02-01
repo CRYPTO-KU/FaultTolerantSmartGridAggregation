@@ -93,7 +93,7 @@ class SM():
         masked = (self.get_raw_measurement(round) + s + p) % self.meta.k
         data = { "id": self.id, "round": round, "data": masked }
         self.reports[round].net_snd += 1
-        return self.net_mngr.send(self.meta.dc_address, json.dumps(data), phase_1_end)
+        return self.net_mngr.send(self.meta.dc_address, data, phase_1_end)
 
     def _run_phase_2(self, round: int, s: int):
         round_start = self.meta.t_start + self.meta.t_round_len * round
@@ -131,7 +131,7 @@ class SM():
                 self.reports[round].net_snd += 1
                 ok = self.net_mngr.send(
                     self.meta.sm_addresses[next_sm],
-                    json.dumps(data),
+                    data,
                     phase_2_end,
                 )
                 # We activated the next SM
@@ -148,7 +148,7 @@ class SM():
             self.reports[round].net_snd += 1
             self.net_mngr.send(
                 self.meta.dc_address,
-                json.dumps(data),
+                data,
                 phase_2_end
             )
 
