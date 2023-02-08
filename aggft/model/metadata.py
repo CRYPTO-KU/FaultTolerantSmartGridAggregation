@@ -1,8 +1,10 @@
-from dataclasses import dataclass
-from enum        import Enum
-from typing      import Tuple
+from dataclasses  import dataclass
+from enum         import Enum
+from typing       import Tuple
 
-from util        import network
+from phe.paillier import PaillierPublicKey, PaillierPrivateKey
+
+from util         import network
 
 ################################################################################
 # Data Types
@@ -73,6 +75,29 @@ class SMMaskingMetadata(MaskingMetadata):
     # Pre-shared PRF Key
     prf_key: bytes
 
+# AggFT Rounds Metadata
+# Specific for using Paillier homomorphic encryption.
+# Base class for the DC and SM versions.
+# Don't use directly.
+@dataclass(frozen = True)
+class PaillierMetadata(Metadata):
+    # Paillier Public Key
+    pk: PaillierPublicKey
+
+# AggFT Rounds Metadata
+# Specific for a DC using Paillier homomorphic encryption.
+@dataclass(frozen = True)
+class DCPaillierMetadata(PaillierMetadata):
+    # Paillier Secret Key
+    sk: PaillierPrivateKey
+
+# AggFT Rounds Metadata
+# Specific for an SM using Paillier homomorphic encryption.
+@dataclass(frozen = True)
+class SMPaillierMetadata(PaillierMetadata):
+    # No SM specific metadata
+    pass
+
 ################################################################################
 # Data Validation
 ################################################################################
@@ -122,3 +147,15 @@ def is_valid_dc_masking_metadata(m: DCMaskingMetadata) -> bool:
 def is_valid_sm_masking_metadata(m: SMMaskingMetadata) -> bool:
     # Should be a valid masking metadata
     return is_valid_masking_metadata(m)
+
+def is_valid_paillier_metadata(m: PaillierMetadata) -> bool:
+    # Should be a valid metadata
+    return is_valid_metadata(m)
+
+def is_valid_dc_paillier_metadata(m: DCPaillierMetadata) -> bool:
+    # Should be a valid paillier metadata
+    return is_valid_paillier_metadata(m)
+
+def is_valid_sm_paillier_metadata(m: SMPaillierMetadata) -> bool:
+    # Should be a valid paillier metadata
+    return is_valid_paillier_metadata(m)
