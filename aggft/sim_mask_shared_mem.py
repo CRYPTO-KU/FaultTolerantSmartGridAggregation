@@ -10,7 +10,7 @@ from itertools import combinations
 
 import csv
 
-from dc    import DC
+from dc    import DC, make_dc
 from sm    import SM
 from model import metadata
 from util  import network
@@ -82,7 +82,7 @@ def dc_factory(test_start: float, registry: Dict[Tuple[network.Host, network.Por
     # Create network manager
     net_mngr = network.SharedMemoryNetworkManager(registry)
 
-    return DC(meta, net_mngr)
+    return make_dc(meta, net_mngr)
 
 def sm_factory(id: int, test_start: float, registry: Dict[Tuple[network.Host, network.Port], Queue], c: Dict[Tuple[int, int], bool]) -> SM:
     # -1 is for the DC

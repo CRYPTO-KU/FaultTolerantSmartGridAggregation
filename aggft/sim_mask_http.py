@@ -10,7 +10,7 @@ from itertools import combinations
 
 import csv
 
-from dc    import DC
+from dc    import DC, make_dc
 from sm    import SM
 from model import metadata
 from util  import network
@@ -72,7 +72,7 @@ def dc_factory(test_start: float, c: Dict[Tuple[int, int], bool]) -> DC:
     # Create network manager
     net_mngr = network.HTTPNetworkManager()
 
-    return DC(meta, net_mngr)
+    return make_dc(meta, net_mngr)
 
 def sm_factory(id: int, test_start: float, c: Dict[Tuple[int, int], bool]) -> SM:
     dc_addr = network.Address("localhost", DC_PORT, c[(-1, id)])

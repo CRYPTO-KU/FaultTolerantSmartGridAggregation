@@ -10,7 +10,7 @@
 	flake-utils.lib.eachDefaultSystem (system: let
 		pkgs = import nixpkgs { inherit system; };
 
-		pythonEnv = pkgs.python3.withPackages (pythonPkgs: with pythonPkgs; [
+		pythonEnv = pkgs.python310.withPackages (pythonPkgs: with pythonPkgs; [
 			aiohttp
 			phe
 			pyaes
