@@ -10,13 +10,10 @@ from itertools import combinations
 
 import csv
 
-from new_aggft.dc import DC
-from new_aggft.sm import SM
-from new_aggft.util import network
-
-from new_aggft.model import metadata
-
-from collections import defaultdict
+from dc    import DC
+from sm    import SM
+from model import metadata
+from util  import network
 
 from typing import Tuple, Dict
 

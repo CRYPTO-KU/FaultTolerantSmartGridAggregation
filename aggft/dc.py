@@ -1,18 +1,17 @@
-import json
 import secrets
 
-from time            import sleep
-from time            import time as now
+from time           import sleep
+from time           import time as now
 
-from .util           import log
-from .util.network   import NetworkManager
-from .util           import prf
-from .util           import time
+from util           import log
+from util.network   import NetworkManager
+from util           import prf
+from util           import time
 
-from typing          import Dict, Tuple
+from typing         import Dict, Tuple
 
-from .model.metadata import DCMaskingMetadata, is_valid_dc_masking_metadata
-from .model.report   import DCReport
+from model.metadata import DCMaskingMetadata, is_valid_dc_masking_metadata
+from model.report   import DCReport
 
 class DC():
     def __init__(self, meta: DCMaskingMetadata, net_mngr: NetworkManager):

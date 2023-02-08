@@ -1,18 +1,17 @@
-import json
 import secrets
 
-from time            import sleep
-from time            import time as now
+from time           import sleep
+from time           import time as now
 
-from .util.network   import NetworkManager
-from .util           import log
-from .util           import prf
-from .util           import time
+from util.network   import NetworkManager
+from util           import log
+from util           import prf
+from util           import time
 
-from typing          import Dict, Tuple
+from typing         import Dict, Tuple
 
-from .model.metadata import SMMaskingMetadata, is_valid_sm_masking_metadata
-from .model.report   import SMReport
+from model.metadata import SMMaskingMetadata, is_valid_sm_masking_metadata
+from model.report   import SMReport
 
 class SM():
     def __init__(self, id: int, meta: SMMaskingMetadata, net_mngr: NetworkManager):

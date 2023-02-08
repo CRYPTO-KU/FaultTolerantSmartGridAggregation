@@ -1,219 +1,120 @@
-# Standard Library Imports
-
-import re
-import selectors
-import socket
-
-from time import time as now
-from uuid import uuid4
-
-# Project Imports
-
-from . import log
-
-# Standard Library Type Imports
+import aiohttp
+import asyncio
+import json
+import threading
 
 from dataclasses import dataclass
-from typing import Any, Callable, Tuple
-from uuid import UUID
-from enum import Enum
+from queue       import Queue
 
-# Project Type Imports
+from aiohttp     import web
 
-from .time import Time
+from abc         import ABC, abstractmethod
+from typing      import Any, Dict, Tuple
 
-# Types
+################################################################################
+# Data Types
+################################################################################
 
 Host = str
 Port = int
-Address = Tuple[Host, Port]
 
-@dataclass
-class _LISTENING_SOCKET:
-    id: UUID
+@dataclass(frozen = True)
+class Address:
+    host : Host
+    port : Port
+    valid: bool
 
-@dataclass
-class _CONNECTION_SOCKET:
-    id: UUID
-    address: Address
-    send: bytes = b""
-    recv: str = ""
+################################################################################
+# Abstract Network Manager
+################################################################################
 
-class _STATE(Enum):
-    IN_PROGRESS = 0
-    SUCCESS = 1
-    FAILED = 2
+# AggFT can work with any networking protocol.
+# Implement the NetworkManager abstract class for new network protocols.
 
-# Constants
+class NetworkManager(ABC):
+    @abstractmethod
+    def send(self, address: Address, data: Dict[str, Any], timeout: float) -> bool:
+        pass
 
-LOCALHOST = "localhost"
-MEGA_BYTE = 8192
+    @abstractmethod
+    def listen(self, address: Address) -> Queue:
+        pass
 
-def listen_multiple(
-    port: Port, stop_no_later_than: Time,
-    start_marker: str, end_marker: str,
-    early_stopper: Callable[[Tuple[str, ...]], bool] = lambda _: False
-) -> Tuple[str, ...]:
-    selector = selectors.DefaultSelector()
+    @abstractmethod
+    def stop(self) -> None:
+        pass
 
-    listening_id = uuid4()
-    listening_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    listening_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-    listening_socket.bind((LOCALHOST, port))
-    listening_socket.listen()
-    listening_socket.setblocking(False)
-    selector.register(
-        listening_socket,
-        selectors.EVENT_READ,
-        data = _LISTENING_SOCKET(listening_id)
-    )
-    log.info(f"[{listening_id}] Listening on port: {port}.")
+################################################################################
+# Shared Memory Networking
+################################################################################
 
-    results = ()
+# Uses shared memory instead of sending actual network requests.
+# Can be used for simulations on one physical machine.
 
-    while True:
-        if now() > stop_no_later_than: break
-        # Setting timeout to zero makes it non-blocking
-        events = selector.select(timeout = 0)
-        should_early_stop = False
-        for key, masks in events:
-            if now() > stop_no_later_than: break
-            elif isinstance(key.data, _LISTENING_SOCKET):
-                accept_connection(key, selector)
-            elif isinstance(key.data, _CONNECTION_SOCKET):
-                state = handle_read_connection(key, masks, selector, start_marker, end_marker)
-                if state == _STATE.SUCCESS:
-                    results = (*results, key.data.recv)
-                    should_early_stop = early_stopper(results)
-                    if should_early_stop:
-                        log.info(f"[{listening_id}] Early stopping...")
-                        break
-        if should_early_stop:
-            log.info(f"[{listening_id}] Early stopping...")
-            break
+class SharedMemoryNetworkManager(NetworkManager):
+    def __init__(self, registry: Dict[Tuple[Host, Port], Queue]):
+        self.registry = registry
 
-    log.info(f"[{listening_id}] Stop listining on port: {port}.")
-    selector.close()
-    return results
+    def send(self, address: Address, data: Dict[str, Any], _) -> bool:
+        if address.valid:
+            self.registry[(address.host, address.port)].put(json.loads(json.dumps(data)))
+            return True
+        return False
 
-def accept_connection(key: Any, selector: selectors.DefaultSelector):
-    socket = key.fileobj
-    listening_id = key.data.id
-    # Socket should be ready to read immediately
-    connection, address = socket.accept()
-    connection.setblocking(False)
-    connection_id = uuid4()
-    selector.register(
-        connection,
-        selectors.EVENT_READ | selectors.EVENT_WRITE,
-        data = _CONNECTION_SOCKET(connection_id, address)
-    )
-    log.info(f"[{listening_id}] Accepted connection [{connection_id}] from: {address}.")
-
-def handle_read_connection(key: Any, masks: int, selector: selectors.DefaultSelector, start_marker: str, end_marker: str) -> _STATE:
-    masks_include = lambda masks, event: masks & event
-    socket = key.fileobj
-    socket_data = key.data
-    if masks_include(masks, selectors.EVENT_READ):
-        # Socket should be ready to read immediately
-        chunk = socket.recv(MEGA_BYTE)
-        socket_data.recv = f"{socket_data.recv}{chunk}"
-
-        match = re.search(f"{start_marker}(?P<msg>.*){end_marker}", socket_data.recv)
-
-        if not chunk:
-            log.info(f"[{socket_data.id}] No chunk received. Aborting connection to {socket_data.address}...")
-            selector.unregister(socket)
-            socket.close()
-            return _STATE.FAILED
-
-        if match is not None:
-            socket_data.recv = match.group("msg")
-            log.info(f"[{socket_data.id}] Received all data. Closing connection to {socket_data.address}...")
-            if masks_include(masks, selectors.EVENT_WRITE):
-                # Socket should be ready to write immediately
-                socket.sendall(str.encode(f"{start_marker}ACK{end_marker}"))
-            selector.unregister(socket)
-            socket.close()
-            return _STATE.SUCCESS
+    def listen(self, address: Address) -> Queue:
+        return self.registry[(address.host, address.port)]
         
-        log.info(f"[{socket_data.id}] Received chunk.")
+    def stop(self) -> None:
+        pass
 
-    return _STATE.IN_PROGRESS
+################################################################################
+# HTTP Networking
+################################################################################
 
-def send(
-    address: Address, content: str, stop_no_later_than: Time,
-    start_marker: str, end_marker: str
-) -> bool:
-    selector = selectors.DefaultSelector()
+# Uses the HTTP network protocol.
+# Can be used for simulations on one physical machine or multiple.
 
-    connection_id = uuid4()
-    connection_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    connection_socket.setblocking(False)
-    connection_socket.connect_ex(address)
-    selector.register(
-        connection_socket,
-        selectors.EVENT_READ | selectors.EVENT_WRITE,
-        data = _CONNECTION_SOCKET(connection_id, address, str.encode(f"{start_marker}{content}{end_marker}"))
-    )
-    log.info(f"[{connection_id}] Starting connection to address: {address}.")
+class HTTPNetworkManager(NetworkManager):
+    def __init__(self):
+        self.port    = 8000
+        self.queue   = Queue()
+        self.thread  = threading.Thread(target = asyncio.run, args = (self._run(),))
+        self.running = True
 
-    result = False
-    done = False
+    async def _run(self):
+        async def handler(request):
+            data = await request.json()
+            self.queue.put(data)
+            return web.Response(text = "OK")
+            
+        app = web.Application()
+        app.add_routes([web.post("/", handler)])
 
-    while True:
-        if done or now() > stop_no_later_than: break
-        # Setting timeout to zero makes it non-blocking
-        events = selector.select(timeout = 0)
-        for key, masks in events:
-            if now() > stop_no_later_than: break
-            elif isinstance(key.data, _CONNECTION_SOCKET):
-                state = handle_write_connection(key, masks, selector, start_marker, end_marker)
-                if state == _STATE.SUCCESS:
-                    result = True
-                    done = True
-                elif state == _STATE.FAILED:
-                    result = False
-                    done = True
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, "localhost", self.port)
+        await site.start()
 
-    log.info(f"[{connection_id}] Stopped connection to address: {address}.")
-    selector.close()
-    return result
+        while self.running:
+            await asyncio.sleep(1)
 
-def handle_write_connection(key: Any, masks: int, selector: selectors.DefaultSelector, start_marker: str, end_marker: str) -> _STATE:
-    masks_include = lambda masks, event: masks & event
-    socket = key.fileobj
-    socket_data = key.data
-    if socket_data.send and masks_include(masks, selectors.EVENT_WRITE):
-        # Socket should be ready to write immediately
-        try:
-            sent = socket.send(socket_data.send)
-        except ConnectionRefusedError:
-            selector.unregister(socket)
-            socket.close()
-            return _STATE.FAILED
+        await runner.cleanup()
 
-        socket_data.send = socket_data.send[sent:]
-    elif masks_include(masks, selectors.EVENT_READ):
-        # Socket should be ready to read immediately
-        chunk = socket.recv(MEGA_BYTE)
-        socket_data.recv = f"{socket_data.recv}{chunk}"
+    def send(self, address: Address, data: Dict[str, Any], timeout: float) -> bool:
+        if not address.valid: return False
+        return asyncio.run(self._send(address, data, timeout))
 
-        match = re.search(f"{start_marker}(?P<msg>.*){end_marker}", socket_data.recv)
-
-        if not chunk:
-            log.info(f"[{socket_data.id}] No chunk received. Aborting connection to {socket_data.address}...")
-            selector.unregister(socket)
-            socket.close()
-            return _STATE.FAILED
-
-        if match is not None:
-            socket_data.recv = match.group("msg")
-            log.info(f"[{socket_data.id}] Received all data. Closing connection to {socket_data.address}...")
-            selector.unregister(socket)
-            socket.close()
-            return _STATE.SUCCESS if socket_data.recv == "ACK" else _STATE.FAILED
+    def listen(self, address: Address) -> Queue:
+        self.port = address.port
+        self.thread.start()
+        return self.queue
         
-        log.info(f"[{socket_data.id}] Received chunk.")
+    def stop(self) -> None:
+        self.running = False
 
-    return _STATE.IN_PROGRESS
+    async def _send(self, address: Address, data: Dict[str, Any], timeout: float):
+        client_timeout = aiohttp.ClientTimeout(total = timeout)
+        async with aiohttp.ClientSession(timeout = client_timeout) as session:
+            url = f"http://{address.host}:{address.port}"
+            async with session.post(url, json = data) as resp:
+                return resp.status == 200
