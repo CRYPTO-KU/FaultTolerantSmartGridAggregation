@@ -9,6 +9,7 @@ from util           import log
 from util.network   import NetworkManager
 from util           import prf
 from util           import time
+from util           import paillier
 
 from typing         import Dict, Tuple
 
@@ -242,6 +243,25 @@ class PaillierDC(DC):
         if not is_valid_dc_paillier_metadata(meta):
             raise ValueError("Invalid data concentrator Paillier metadata.")
         super().__init__(meta, net_mngr)
+        self.meta = meta
+
+    def _specific_is_phase_1_request_valid(self, round: int, req: Dict) -> bool:
+        return True
+
+    def _parse_phase_1_request(self, round: int, req: Dict) -> Dict:
+        return {}
+
+    def _generate_s_initial(self):
+        m = self.meta.pk.encrypt(0)
+        return paillier.serialize_encrypted_number(m)
+
+    def _specific_is_phase_2_request_valid(self, round: int, req: Dict) -> bool:
+        return True
+
+    def _calc_aggregate(self, round: int, data: Dict, s_initial, req: Dict):
+        m = req["s"]
+        s = paillier.deserialize_encrypted_number(m, self.meta.pk)
+        return self.meta.sk.decrypt(s)
 
 
 ################################################################################
