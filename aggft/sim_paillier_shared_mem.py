@@ -17,6 +17,8 @@ from util  import network
 
 from collections import defaultdict
 
+from phe import paillier
+
 from typing import Tuple, Dict
 
 SM_COUNT         = 2
@@ -28,6 +30,8 @@ STARTUP_WAIT     = 0.1
 ROUND_LEN        = 4
 PHASE_1_LEN      = 2
 REPORT_FILENAME  = "report_3_sm.csv"
+
+pk, sk = paillier.generate_paillier_keypair()
 
 # Yield all combinations of elements from the input iterable
 def all_combinations(iterable):
@@ -67,7 +71,7 @@ def dc_factory(test_start: float, registry: Dict[Tuple[network.Host, network.Por
     for i in range(SM_COUNT):
         sm_addr.append(network.Address("localhost", i, c[(-1, i)]))
 
-    meta = metadata.DCMaskingMetadata(
+    meta = metadata.DCPaillierMetadata(
         metadata.AGGFT_MODE.MASKING,
         dc_addr,
         sm_addr,
@@ -75,8 +79,8 @@ def dc_factory(test_start: float, registry: Dict[Tuple[network.Host, network.Por
         test_start + STARTUP_WAIT,
         ROUND_LEN,
         PHASE_1_LEN,
-        K,
-        prf_keys
+        pk,
+        sk
     )
 
     # Create network manager
@@ -92,7 +96,7 @@ def sm_factory(id: int, test_start: float, registry: Dict[Tuple[network.Host, ne
     for i in range(SM_COUNT):
         sm_addr.append(network.Address("localhost", i, c[(id, i)]))
 
-    meta = metadata.SMMaskingMetadata(
+    meta = metadata.SMPaillierMetadata(
         metadata.AGGFT_MODE.MASKING,
         dc_addr,
         sm_addr,
@@ -100,8 +104,7 @@ def sm_factory(id: int, test_start: float, registry: Dict[Tuple[network.Host, ne
         test_start + STARTUP_WAIT,
         ROUND_LEN,
         PHASE_1_LEN,
-        K,
-        prf_keys[id]
+        pk
     )
 
     # Create network manager

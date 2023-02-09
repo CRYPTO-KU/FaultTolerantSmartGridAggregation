@@ -15,6 +15,8 @@ from sm    import SM, make_sm
 from model import metadata
 from util  import network
 
+from phe import paillier
+
 from typing import Tuple, Dict
 
 SM_COUNT         = 2
@@ -35,6 +37,8 @@ TOPOLOGY = {
     (-1, 1): True,
     (0, 1): True,
 }
+
+pk, sk = paillier.generate_paillier_keypair()
 
 topology = {}
 
@@ -57,7 +61,7 @@ def dc_factory(test_start: float, c: Dict[Tuple[int, int], bool]) -> DC:
     for i in range(SM_COUNT):
         sm_addr.append(network.Address("localhost", SM_PORTS[i], c[(-1, i)]))
 
-    meta = metadata.DCMaskingMetadata(
+    meta = metadata.DCPaillierMetadata(
         metadata.AGGFT_MODE.MASKING,
         dc_addr,
         sm_addr,
@@ -65,8 +69,8 @@ def dc_factory(test_start: float, c: Dict[Tuple[int, int], bool]) -> DC:
         test_start + STARTUP_WAIT,
         ROUND_LEN,
         PHASE_1_LEN,
-        K,
-        prf_keys
+        pk,
+        sk
     )
 
     # Create network manager
@@ -81,7 +85,7 @@ def sm_factory(id: int, test_start: float, c: Dict[Tuple[int, int], bool]) -> SM
     for i in range(SM_COUNT):
         sm_addr.append(network.Address("localhost", SM_PORTS[i], c[(id, i)]))
 
-    meta = metadata.SMMaskingMetadata(
+    meta = metadata.SMPaillierMetadata(
         metadata.AGGFT_MODE.MASKING,
         dc_addr,
         sm_addr,
@@ -89,8 +93,7 @@ def sm_factory(id: int, test_start: float, c: Dict[Tuple[int, int], bool]) -> SM
         test_start + STARTUP_WAIT,
         ROUND_LEN,
         PHASE_1_LEN,
-        K,
-        prf_keys[id]
+        pk
     )
 
     # Create network manager
