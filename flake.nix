@@ -18,7 +18,7 @@
 		]);
 	in {
 		devShell = pkgs.mkShell {
-			nativeBuildInputs = with pkgs; [ pythonEnv ruby ];
+			nativeBuildInputs = [ pythonEnv ];
 			buildInputs = [ ];
 		};
 	});

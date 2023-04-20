@@ -4,5 +4,5 @@ To run the failure check code:
 
 ```bash
 mkdir -p results
-ruby failure_check.rb >> results/failure_check.csv
+python3 aggft/failure_check.py >> results/failure_check.csv
 ```

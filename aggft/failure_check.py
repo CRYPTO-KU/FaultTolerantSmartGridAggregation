@@ -1,34 +1,45 @@
 from os       import urandom
 from phe      import paillier
-from simulate import link_utils, shared_mem, simulator, args, base_meta
+from simulate import link_utils, shared_mem, simulator, base_meta
 
-K           = int(2e20)
-PRF_KEY_LEN = 32
+CONSTANTS = {
+    "N_MIN"        : 2,
+    "K"            : int(2e20),
+    "PRF_KEY_LEN"  : 32,
+    "ROUND_LEN"    : 5.0,
+    "PHASE_1_LEN"  : 2.0,
+    "STARTUP_WAIT" : 0.1
+}
 
-# Parse arguments
-argv = args.parse_args()
+print("PRIVACY TYPE,SM COUNT,FAILURES")
 
-# Generate Keys
-prf_keys = tuple([urandom(PRF_KEY_LEN) for _ in range(argv.SM_COUNT)])
-pk, sk = paillier.generate_paillier_keypair()
+for N in (2, 3, 4):
+    for PRIVACY_TYPE in [ "mask", "encr" ]:
+        args = { **CONSTANTS, "SM_COUNT": N, "PRIVACY_TYPE": PRIVACY_TYPE }
 
-# Helper functions
-base_dc_meta = base_meta.base_dc_masking_meta(argv, K, prf_keys) if argv.PRIVACY_TYPE == "mask" else base_meta.base_dc_paillier_meta(argv, pk, sk)
-base_sm_meta = base_meta.base_sm_masking_meta(argv, K, prf_keys) if argv.PRIVACY_TYPE == "mask" else base_meta.base_sm_paillier_meta(argv, pk)
-def make_net_mngr():
-    return shared_mem.make_shared_memory_net_mngr(argv.SM_COUNT)
+        # Generate Keys
+        prf_keys = tuple([urandom(args["PRF_KEY_LEN"]) for _ in range(N)])
+        pk, sk = paillier.generate_paillier_keypair()
 
-reports = simulator.simulate(
-    argv.SM_COUNT,
-    argv.STARTUP_WAIT,
-    link_utils.all_links_configurations(argv.SM_COUNT),
-    make_net_mngr,
-    base_dc_meta,
-    base_sm_meta
-)
+        args = { **args, "prf_keys": prf_keys, "pk": pk, "sk": sk }
 
-failures = 0
-for dc_report, sm_reports in reports:
-    failures += int(not dc_report.terminated)
+        # Helper functions
+        base_dc_meta = base_meta.base_dc_masking_meta(args) if PRIVACY_TYPE == "mask" else base_meta.base_dc_paillier_meta(args)
+        base_sm_meta = base_meta.base_sm_masking_meta(args) if PRIVACY_TYPE == "mask" else base_meta.base_sm_paillier_meta(args)
+        def make_net_mngr():
+            return shared_mem.make_shared_memory_net_mngr(N)
 
-print(f"{argv.PRIVACY_TYPE},{argv.SM_COUNT},{failures}")
+        reports = simulator.simulate(
+            N,
+            args["STARTUP_WAIT"],
+            link_utils.all_links_configurations(N),
+            make_net_mngr,
+            base_dc_meta,
+            base_sm_meta
+        )
+
+        failures = 0
+        for dc_report, sm_reports in reports:
+            failures += int(not dc_report.terminated)
+
+        print(f"{PRIVACY_TYPE},{N},{failures}")
