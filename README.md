@@ -3,6 +3,6 @@
 To run the failure check code:
 
 ```bash
-mkdir results
-ruby failure_check.rb >> failure_check.csv
+mkdir -p results
+ruby failure_check.rb >> results/failure_check.csv
 ```
