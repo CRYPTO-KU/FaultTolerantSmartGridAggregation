@@ -11,7 +11,8 @@ _console = Console()
 
 def _log(type, color, msg):
     now = datetime.now().strftime("[%H:%M:%S]")
-    _console.print(f"[{color} bold]{now} {type}:[/] {escape(msg)}")
+    # NOTE: Uncomment to enable logging
+    # _console.print(f"[{color} bold]{now} {type}:[/] {escape(msg)}")
 
 ################################################################################
 # Logging Helpers
