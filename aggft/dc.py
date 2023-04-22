@@ -180,7 +180,8 @@ class DC(ABC):
                 aggregate = self._calc_aggregate(round, data, s_initial, req)
                 log.success(f"Round {round} aggregate: {aggregate}.")
                 self.reports[round].success = True
-                self.reports[round].phase_2_count = req["l_act"]
+                self.reports[round].phase_2_count = len(req["l_act"])
+                break
 
     def _is_phase_2_request_valid(self, round: int, req: Dict) -> bool:
         generic_valid  = self._generic_is_phase_2_request_valid(round,  req)
