@@ -109,6 +109,7 @@ class DC(ABC):
         l_rem = []
         while now() < phase_1_end:
             if self.req_q.empty():
+                sleep(0.1)
                 continue
 
             self.reports[round].net_rcv += 1
@@ -169,6 +170,7 @@ class DC(ABC):
 
         while now() < phase_2_end:
             if self.req_q.empty():
+                sleep(0.1)
                 continue
 
             self.reports[round].net_rcv += 1

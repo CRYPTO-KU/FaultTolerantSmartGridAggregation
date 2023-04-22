@@ -114,6 +114,7 @@ class SM(ABC):
 
         while now() < phase_2_end:
             if self.req_q.empty():
+                sleep(0.1)
                 continue
 
             self.reports[round].net_rcv += 1
