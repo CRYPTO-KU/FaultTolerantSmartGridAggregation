@@ -16,7 +16,7 @@ CONSTANTS = {
 # Set random seed
 random.seed(CONSTANTS["SEED"])
 
-print("SM COUNT,PRIVACY TYPE,P,Terminated,Success,DC TIME,MAX SM TIME,PHASE 1 COUNT,PHASE 2 COUNT")
+print("SM COUNT,PRIVACY TYPE,P,Terminated,Success,TOTAL DC TIME,PHASE 1 DC TIME,MAX TOTAL SM TIME,PHASE 1 COUNT,PHASE 2 COUNT")
 
 for N in (50, 100, 200, 400):
     for PRIVACY_TYPE in ("mask", "encr"):
@@ -51,7 +51,7 @@ for N in (50, 100, 200, 400):
             )
 
             for dc_report, sm_reports in reports:
-                terminated  = int(not dc_report.terminated)
+                terminated  = int(dc_report.terminated)
                 success     = int(dc_report.success)
                 dc_time     = dc_report.t_end - dc_report.t_start
                 dc_time_p_1 = dc_report.t_phase_1 - dc_report.t_start
