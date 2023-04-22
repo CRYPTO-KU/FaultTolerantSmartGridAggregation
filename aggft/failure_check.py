@@ -1,25 +1,31 @@
-from os       import urandom
+import random
+
 from phe      import paillier
 from simulate import link_utils, shared_mem, simulator, base_meta
 
 CONSTANTS = {
-    "N_MIN"        : 2,
-    "K"            : int(2e20),
-    "PRF_KEY_LEN"  : 32,
-    "ROUND_LEN"    : 5.0,
-    "PHASE_1_LEN"  : 2.0,
-    "STARTUP_WAIT" : 0.1
+    "N_MIN"             : 2,
+    "K"                 : int(2e20),
+    "PRF_KEY_LEN"       : 32,
+    "PAILLIER_KEY_LEN"  : 256,
+    "ROUND_LEN"         : 5.0,
+    "PHASE_1_LEN"       : 2.0,
+    "STARTUP_WAIT"      : 0.1,
+    "SEED"              : 0
 }
+
+# Set random seed
+random.seed(CONSTANTS["SEED"])
 
 print("PRIVACY TYPE,SM COUNT,FAILURES")
 
-for N in (2, 3, 4):
-    for PRIVACY_TYPE in [ "mask", "encr" ]:
+for N in ( 2, 3, 4 ):
+    for PRIVACY_TYPE in ( "mask", "encr" ):
         args = { **CONSTANTS, "SM_COUNT": N, "PRIVACY_TYPE": PRIVACY_TYPE }
 
         # Generate Keys
-        prf_keys = tuple([urandom(args["PRF_KEY_LEN"]) for _ in range(N)])
-        pk, sk = paillier.generate_paillier_keypair()
+        prf_keys = tuple([random.randbytes(args["PRF_KEY_LEN"]) for _ in range(N)])
+        pk, sk = paillier.generate_paillier_keypair(n_length = CONSTANTS["PAILLIER_KEY_LEN"])
 
         args = { **args, "prf_keys": prf_keys, "pk": pk, "sk": sk }
 
