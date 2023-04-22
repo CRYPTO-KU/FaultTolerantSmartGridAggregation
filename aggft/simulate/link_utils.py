@@ -1,4 +1,5 @@
 from itertools   import combinations
+from random      import random
 
 from collections import defaultdict
 
@@ -24,6 +25,18 @@ def _all_links(sm_count: int) -> Tuple[Tuple[int, int], ...]:
             links.append((i, j))
     return tuple(links)
 
+# Generate a configuration where the links fail with probability p
+def _uniform_fail_configuration(sm_count: int, p: float):
+    links = _all_links(sm_count)
+    connectivity_table = defaultdict(lambda: False)
+    for i, j in links:
+        is_connected = random() >= p
+        connectivity_table[(i, j)] = is_connected
+        connectivity_table[(j, i)] = is_connected
+    for i in [-1] + list(range(sm_count)):
+        connectivity_table[(i, i)] = False
+    return connectivity_table
+
 ################################################################################
 # Links Helpers
 ################################################################################
@@ -38,3 +51,7 @@ def all_links_configurations(sm_count: int):
         for i in [-1] + list(range(sm_count)):
             connectivity_table[(i, i)] = False
         yield connectivity_table
+
+def uniform_fail_configurations(sm_count: int, f: float, n: int):
+    for _ in range(n):
+        yield _uniform_fail_configuration(sm_count, f)
