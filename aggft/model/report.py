@@ -14,6 +14,9 @@ class DCReport:
     # This is commonly referred to as Unix time.
     t_start      : float = 0
 
+    # Phase 1 End Time (Unix Time)
+    t_phase_1    : float = 0
+
     # Round End Time (Unix Time)
     t_end        : float = 0
 

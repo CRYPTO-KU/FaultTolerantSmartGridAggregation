@@ -79,6 +79,7 @@ class DC(ABC):
 
         data, l_rem = self._run_phase_1(round)
         self.reports[round].phase_1_count = len(l_rem)
+        self.reports[round].t_phase_1 = now()
         if len(l_rem) < self.meta.n_min:
             log.warning(f"[round {round}] {len(l_rem)} out of {self.meta.n_min} required smart meters participated in phase 1. Aborting round...")
             self.reports[round].terminated = True
