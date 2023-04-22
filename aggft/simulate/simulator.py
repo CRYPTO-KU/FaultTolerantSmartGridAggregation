@@ -21,8 +21,6 @@ def simulate(
 
         test_start = now()
 
-        threads = ()
-
         dc = factories.dc_factory(
             sm_count,
             test_start,
@@ -32,9 +30,9 @@ def simulate(
             c
         )
         dc_thread = threading.Thread(target = dc.run_once)
-        threads = (*threads, dc_thread)
 
         sms = ()
+        sm_threads = ()
         for id in range(sm_count):
             sm = factories.sm_factory(
                 id,
@@ -46,14 +44,17 @@ def simulate(
                 c
             )
             sm_thread = threading.Thread(target = sm.run_once)
-            threads = (*threads, sm_thread)
+            sm_threads = (*sm_threads, sm_thread)
             sms = (*sms, sm)
 
         # Start all threads
-        for thread in threads: thread.start()
+        dc_thread.start()
+        for thread in sm_threads: thread.start()
 
-        # Wait for all threads
-        for thread in threads: thread.join()
+        # Wait for DC thread
+        dc_thread.join()
+        for sm in sms: sm.killed = True
+        for thread in sm_threads: thread.join()
 
         dc_report  = dc.reports[0]
         sm_reports = tuple([sm.reports[0] for sm in sms])

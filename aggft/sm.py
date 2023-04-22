@@ -33,6 +33,7 @@ class SM(ABC):
         self.meta     = meta
         self.net_mngr = net_mngr
         self.reports  = []
+        self.killed   = False
 
     def run_forever(self):
         self._listen()
@@ -112,7 +113,7 @@ class SM(ABC):
         round_start = self.meta.t_start + self.meta.t_round_len * round
         phase_2_end = round_start + self.meta.t_round_len
 
-        while now() < phase_2_end:
+        while now() < phase_2_end and not self.killed:
             if self.req_q.empty():
                 sleep(0.1)
                 continue
