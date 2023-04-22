@@ -157,7 +157,8 @@ class DC(ABC):
         data = { "round": round, "s": s_initial, "l_rem": l_rem, "l_act": [] }
         round_start = self.meta.t_start + self.meta.t_round_len * round
         phase_2_end = round_start + self.meta.t_round_len
-        for address in self.meta.sm_addresses:
+        for sm_id in l_rem:
+            address = self.meta.sm_addresses[sm_id]
             if not address.valid: continue
             self.reports[round].net_snd += 1
             ok = self.net_mngr.send(address, data, phase_2_end)
