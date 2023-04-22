@@ -6,7 +6,6 @@ from model import metadata
 from sm import SM, make_sm
 from util import network
 
-
 ################################################################################
 # DC / SM Factories
 ################################################################################

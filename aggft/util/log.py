@@ -3,7 +3,6 @@ from datetime import datetime
 from rich.console import Console
 from rich.markup import escape
 
-
 ################################################################################
 # Private Internals
 ################################################################################

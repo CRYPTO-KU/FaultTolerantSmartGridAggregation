@@ -3,7 +3,6 @@ from itertools import combinations
 from random import random
 from typing import Tuple
 
-
 ################################################################################
 # Private Internals
 ################################################################################

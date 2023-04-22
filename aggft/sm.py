@@ -15,7 +15,6 @@ from model.report import SMReport
 from util import log, paillier, prf, time
 from util.network import NetworkManager
 
-
 ################################################################################
 # Classes
 # NOTE:

@@ -15,14 +15,12 @@ from model.report import DCReport
 from util import log, paillier, prf, time
 from util.network import NetworkManager
 
-
 ################################################################################
 # Classes
 # NOTE:
 # Don't call constructor directly.
 # Use the factory method to make instances.
 ################################################################################
-
 
 # Generic DC
 # Abstract Class - Use concrete implemententations
@@ -285,7 +283,6 @@ class PaillierDC(DC):
 ################################################################################
 # Factory
 ################################################################################
-
 
 # Construct the correct type of DC based on the given metadata
 def make_dc(

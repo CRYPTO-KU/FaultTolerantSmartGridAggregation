@@ -2,7 +2,6 @@ from typing import Tuple
 
 from phe.paillier import EncryptedNumber, PaillierPublicKey
 
-
 ################################################################################
 # Helper Functions
 ################################################################################

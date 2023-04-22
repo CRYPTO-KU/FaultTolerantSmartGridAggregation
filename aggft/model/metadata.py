@@ -5,7 +5,6 @@ from typing import Tuple
 from phe.paillier import PaillierPrivateKey, PaillierPublicKey
 from util import network
 
-
 ################################################################################
 # Data Types
 ################################################################################

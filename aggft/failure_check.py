@@ -4,7 +4,6 @@ from phe import paillier
 from simulate import base_meta, link_utils, shared_mem, simulator
 from util import network
 
-
 ################################################################################
 # Simulation Parameters
 ################################################################################

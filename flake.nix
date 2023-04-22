@@ -10,15 +10,23 @@
 	flake-utils.lib.eachDefaultSystem (system: let
 		pkgs = import nixpkgs { inherit system; };
 
-		pythonEnv = pkgs.python310.withPackages (pythonPkgs: with pythonPkgs; [
+		ourPython = pkgs.python310;
+
+		pythonEnv = ourPython.withPackages (pythonPkgs: with pythonPkgs; [
 			aiohttp
 			phe
 			pyaes
 			rich 
 		]);
+
+		format-code = with pkgs; writeShellScriptBin "format-code" ''
+			${ourPython.pkgs.isort}/bin/isort aggft
+			${autoflake}/bin/autoflake -r --in-place --remove-unused-variables aggft
+			${black}/bin/black aggft
+		'';
 	in {
 		devShell = pkgs.mkShell {
-			nativeBuildInputs = [ pythonEnv ];
+			nativeBuildInputs = [ pythonEnv format-code ];
 			buildInputs = [ ];
 		};
 	});
