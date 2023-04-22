@@ -1,27 +1,26 @@
 import secrets
+from abc import ABC, abstractmethod
+from time import sleep
+from time import time as now
+from typing import Dict, Tuple
 
-from abc            import ABC, abstractmethod
-
-from time           import sleep
-from time           import time as now
-
-from util           import log
-from util.network   import NetworkManager
-from util           import prf
-from util           import time
-from util           import paillier
-
-from typing         import Dict, Tuple
-
-from model.metadata import Metadata
-from model.metadata import DCMaskingMetadata, is_valid_dc_masking_metadata
-from model.metadata import DCPaillierMetadata, is_valid_dc_paillier_metadata
-from model.report   import DCReport
+from model.metadata import (
+    DCMaskingMetadata,
+    DCPaillierMetadata,
+    Metadata,
+    is_valid_dc_masking_metadata,
+    is_valid_dc_paillier_metadata,
+)
+from model.report import DCReport
+from util import log, paillier, prf, time
+from util.network import NetworkManager
 
 
 ################################################################################
 # Classes
-# NOTE: Use the factory method to make instances.
+# NOTE:
+# Don't call constructor directly.
+# Use the factory method to make instances.
 ################################################################################
 
 
@@ -29,9 +28,9 @@ from model.report   import DCReport
 # Abstract Class - Use concrete implemententations
 class DC(ABC):
     def __init__(self, meta: Metadata, net_mngr: NetworkManager):
-        self.meta     = meta
+        self.meta = meta
         self.net_mngr = net_mngr
-        self.reports  = []
+        self.reports = []
 
     def run_forever(self):
         self._listen()
@@ -47,7 +46,7 @@ class DC(ABC):
             self._run_single_round(round)
             log.info(f"Round {round} ended.")
             round += 1
-            
+
     def run_once(self):
         self._listen()
 
@@ -55,7 +54,7 @@ class DC(ABC):
         log.info("Waiting for operation start...")
         sleep(time.remaining_until(self.meta.t_start))
         log.info("Operation started.")
-        
+
         log.info(f"Round started.")
         self._run_single_round(0)
         log.info(f"Round ended.")
@@ -75,24 +74,30 @@ class DC(ABC):
         round_start = self.meta.t_start + self.meta.t_round_len * round
         sleep(time.remaining_until(round_start))
 
-        self.reports.append(DCReport(t_start = now()))
+        self.reports.append(DCReport(t_start=now()))
 
         data, l_rem = self._run_phase_1(round)
         self.reports[round].phase_1_count = len(l_rem)
         self.reports[round].t_phase_1 = now()
         if len(l_rem) < self.meta.n_min:
-            log.warning(f"[round {round}] {len(l_rem)} out of {self.meta.n_min} required smart meters participated in phase 1. Aborting round...")
+            log.warning(
+                f"[round {round}] {len(l_rem)} out of {self.meta.n_min} required smart meters participated in phase 1. Aborting round..."
+            )
             self.reports[round].terminated = True
             self.reports[round].t_end = now()
             return
 
-        log.info(f"[round {round}] [phase 1] {len(l_rem)} smart meters participated in phase 1.")
+        log.info(
+            f"[round {round}] [phase 1] {len(l_rem)} smart meters participated in phase 1."
+        )
         log.info(f"[round {round}] [phase 1] Data: {data}")
         s_initial = self._generate_s_initial()
         log.info(f"[round {round}] Activating first smart meter...")
         activated = self._activate_first_sm(round, s_initial, l_rem)
         if not activated:
-            log.warning(f"[round {round}] Could not activate first smart meter. Aborting round...")
+            log.warning(
+                f"[round {round}] Could not activate first smart meter. Aborting round..."
+            )
             self.reports[round].terminated = True
             self.reports[round].t_end = now()
             return
@@ -125,7 +130,7 @@ class DC(ABC):
         return data, tuple(sorted(l_rem))
 
     def _is_phase_1_request_valid(self, round: int, req: Dict) -> bool:
-        generic_valid  = self._generic_is_phase_1_request_valid(round,  req)
+        generic_valid = self._generic_is_phase_1_request_valid(round, req)
         specific_valid = self._specific_is_phase_1_request_valid(round, req)
         return generic_valid and specific_valid
 
@@ -135,9 +140,11 @@ class DC(ABC):
             return False
 
         # Round should be correct
-        if req["round"] != round: return False
+        if req["round"] != round:
+            return False
 
-        if req["id"] not in range(len(self.meta.sm_addresses)): return False
+        if req["id"] not in range(len(self.meta.sm_addresses)):
+            return False
 
         return True
 
@@ -154,15 +161,17 @@ class DC(ABC):
         pass
 
     def _activate_first_sm(self, round: int, s_initial, l_rem: Tuple[int, ...]) -> bool:
-        data = { "round": round, "s": s_initial, "l_rem": l_rem, "l_act": [] }
+        data = {"round": round, "s": s_initial, "l_rem": l_rem, "l_act": []}
         round_start = self.meta.t_start + self.meta.t_round_len * round
         phase_2_end = round_start + self.meta.t_round_len
         for sm_id in l_rem:
             address = self.meta.sm_addresses[sm_id]
-            if not address.valid: continue
+            if not address.valid:
+                continue
             self.reports[round].net_snd += 1
             ok = self.net_mngr.send(address, data, phase_2_end)
-            if ok: return True
+            if ok:
+                return True
         return False
 
     def _run_phase_2(self, round: int, data: Dict, s_initial):
@@ -185,7 +194,7 @@ class DC(ABC):
                 break
 
     def _is_phase_2_request_valid(self, round: int, req: Dict) -> bool:
-        generic_valid  = self._generic_is_phase_2_request_valid(round,  req)
+        generic_valid = self._generic_is_phase_2_request_valid(round, req)
         specific_valid = self._specific_is_phase_2_request_valid(round, req)
         return generic_valid and specific_valid
 
@@ -195,11 +204,14 @@ class DC(ABC):
             return False
 
         # Round should be correct
-        if req["round"] != round: return False
+        if req["round"] != round:
+            return False
 
-        if not isinstance(req["l_act"], list): return False
+        if not isinstance(req["l_act"], list):
+            return False
         for i in req["l_act"]:
-            if i not in range(len(self.meta.sm_addresses)): return False
+            if i not in range(len(self.meta.sm_addresses)):
+                return False
 
         return True
 
@@ -210,6 +222,7 @@ class DC(ABC):
     @abstractmethod
     def _calc_aggregate(self, round: int, data: Dict, s_initial, req: Dict):
         pass
+
 
 # Masking DC
 # Concrete implemententation of DC
@@ -237,7 +250,7 @@ class MaskingDC(DC):
 
     def _calc_aggregate(self, round: int, data: Dict, s_initial, req: Dict):
         masked_sum = sum(map(lambda id: data[id]["masked"], req["l_act"]))
-        prfs_l_act = sum(map(lambda id: data[id]["prf"],    req["l_act"]))
+        prfs_l_act = sum(map(lambda id: data[id]["prf"], req["l_act"]))
         return (masked_sum - (req["s"] - s_initial) - prfs_l_act) % self.meta.k
 
 
@@ -275,7 +288,9 @@ class PaillierDC(DC):
 
 
 # Construct the correct type of DC based on the given metadata
-def make_dc(meta: DCMaskingMetadata | DCPaillierMetadata, net_mngr: NetworkManager) -> DC:
+def make_dc(
+    meta: DCMaskingMetadata | DCPaillierMetadata, net_mngr: NetworkManager
+) -> DC:
     if isinstance(meta, DCMaskingMetadata):
         return MaskingDC(meta, net_mngr)
     return PaillierDC(meta, net_mngr)

@@ -1,10 +1,12 @@
-from queue  import Queue
+from queue import Queue
 
-from util   import network
+from util import network
+
 
 ################################################################################
 # Helper Functions
 ################################################################################
+
 
 def make_registry(sm_count: int) -> network.Registry:
     registry = {}

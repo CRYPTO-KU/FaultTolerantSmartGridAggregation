@@ -1,64 +1,68 @@
-from dataclasses  import dataclass
-from enum         import Enum
-from typing       import Tuple
+from dataclasses import dataclass
+from enum import Enum
+from typing import Tuple
 
-from phe.paillier import PaillierPublicKey, PaillierPrivateKey
+from phe.paillier import PaillierPrivateKey, PaillierPublicKey
+from util import network
 
-from util         import network
 
 ################################################################################
 # Data Types
 ################################################################################
 
+
 class AGGFT_MODE(Enum):
-    MASKING     = 0
+    MASKING = 0
     HOMOMORPHIC = 1
+
 
 # AggFT Rounds Metadata
 # Base class for the masking and homomorphic encryption versions.
 # Don't use directly.
-@dataclass(frozen = True)
+@dataclass(frozen=True)
 class Metadata:
     # AggFT Mode Of Operation
     # Specifies if we are using masking or homomorphic encryption for security.
-    mode         : AGGFT_MODE
+    mode: AGGFT_MODE
 
     # Data Concentrator (DC) Address
-    dc_address   : network.Address
+    dc_address: network.Address
 
     # Smart Meters (SMs) Addresses
-    sm_addresses : Tuple[network.Address, ...]
+    sm_addresses: Tuple[network.Address, ...]
 
     # Minimum Number Of Contributing Smart Meters
     # The information needed to recover the aggregate is only sent, if at least
     # n_min households contribute.
-    n_min        : int
+    n_min: int
 
     # First Round Start Time
     # Time in seconds since the epoch as a floating point number.
     # This is commonly referred to as Unix time.
-    t_start      : float
+    t_start: float
 
     # Round Length / Duration (Seconds)
-    t_round_len  : float
+    t_round_len: float
 
     # Phase 1 Length / Duration (Seconds)
     # The length of phase 2 is determined by t_round_len and t_phase_1_len.
     t_phase_1_len: float
 
+
 # AggFT Rounds Metadata
 # Specific for using masking.
 # Base class for the DC and SM versions.
 # Don't use directly.
-@dataclass(frozen = True)
+@dataclass(frozen=True)
 class MaskingMetadata(Metadata):
     # Group Modulus
     #  We generate mask values to within the group.
     k: int
 
+
 # AggFT Rounds Metadata
 # Specific for a DC using masking.
-@dataclass(frozen = True)
+@dataclass(frozen=True)
 class DCMaskingMetadata(MaskingMetadata):
     # Pre-shared PRF Keys
     # The smart meters add a round-dependent pseudo-random number produced by a
@@ -68,39 +72,45 @@ class DCMaskingMetadata(MaskingMetadata):
     # prevent the computation of the sum.
     prf_keys: Tuple[bytes, ...]
 
+
 # AggFT Rounds Metadata
 # Specific for an SM using masking.
-@dataclass(frozen = True)
+@dataclass(frozen=True)
 class SMMaskingMetadata(MaskingMetadata):
     # Pre-shared PRF Key
     prf_key: bytes
+
 
 # AggFT Rounds Metadata
 # Specific for using Paillier homomorphic encryption.
 # Base class for the DC and SM versions.
 # Don't use directly.
-@dataclass(frozen = True)
+@dataclass(frozen=True)
 class PaillierMetadata(Metadata):
     # Paillier Public Key
     pk: PaillierPublicKey
 
+
 # AggFT Rounds Metadata
 # Specific for a DC using Paillier homomorphic encryption.
-@dataclass(frozen = True)
+@dataclass(frozen=True)
 class DCPaillierMetadata(PaillierMetadata):
     # Paillier Secret Key
     sk: PaillierPrivateKey
 
+
 # AggFT Rounds Metadata
 # Specific for an SM using Paillier homomorphic encryption.
-@dataclass(frozen = True)
+@dataclass(frozen=True)
 class SMPaillierMetadata(PaillierMetadata):
     # No SM specific metadata
     pass
 
+
 ################################################################################
 # Data Validation
 ################################################################################
+
 
 def is_valid_metadata(m: Metadata) -> bool:
     # At least 2 smart meters should contribute
@@ -122,6 +132,7 @@ def is_valid_metadata(m: Metadata) -> bool:
 
     return True
 
+
 def is_valid_masking_metadata(m: MaskingMetadata) -> bool:
     # Should be a valid metadata
     if not is_valid_metadata(m):
@@ -132,6 +143,7 @@ def is_valid_masking_metadata(m: MaskingMetadata) -> bool:
         return False
 
     return True
+
 
 def is_valid_dc_masking_metadata(m: DCMaskingMetadata) -> bool:
     # Should be a valid masking metadata
@@ -144,17 +156,21 @@ def is_valid_dc_masking_metadata(m: DCMaskingMetadata) -> bool:
 
     return True
 
+
 def is_valid_sm_masking_metadata(m: SMMaskingMetadata) -> bool:
     # Should be a valid masking metadata
     return is_valid_masking_metadata(m)
+
 
 def is_valid_paillier_metadata(m: PaillierMetadata) -> bool:
     # Should be a valid metadata
     return is_valid_metadata(m)
 
+
 def is_valid_dc_paillier_metadata(m: DCPaillierMetadata) -> bool:
     # Should be a valid paillier metadata
     return is_valid_paillier_metadata(m)
+
 
 def is_valid_sm_paillier_metadata(m: SMPaillierMetadata) -> bool:
     # Should be a valid paillier metadata

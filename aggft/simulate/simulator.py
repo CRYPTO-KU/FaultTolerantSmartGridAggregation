@@ -1,12 +1,13 @@
 import threading
-
-from time     import time as now
+from time import time as now
 
 from simulate import factories
+
 
 ################################################################################
 # Simulation Logic
 ################################################################################
+
 
 def simulate(
     sm_count,
@@ -15,7 +16,7 @@ def simulate(
     make_net_mngr,
     base_dc_meta,
     base_sm_meta,
-    starting_port
+    starting_port,
 ):
     for c in configurations:
         test_start = now()
@@ -27,9 +28,9 @@ def simulate(
             base_dc_meta(),
             make_net_mngr(),
             c,
-            starting_port
+            starting_port,
         )
-        dc_thread = threading.Thread(target = dc.run_once)
+        dc_thread = threading.Thread(target=dc.run_once)
 
         sms = ()
         sm_threads = ()
@@ -42,22 +43,25 @@ def simulate(
                 base_sm_meta(id),
                 make_net_mngr(),
                 c,
-                starting_port
+                starting_port,
             )
-            sm_thread = threading.Thread(target = sm.run_once)
+            sm_thread = threading.Thread(target=sm.run_once)
             sm_threads = (*sm_threads, sm_thread)
             sms = (*sms, sm)
 
         # Start all threads
         dc_thread.start()
-        for thread in sm_threads: thread.start()
+        for thread in sm_threads:
+            thread.start()
 
         # Wait for DC thread
         dc_thread.join()
-        for sm in sms: sm.killed = True
-        for thread in sm_threads: thread.join()
+        for sm in sms:
+            sm.killed = True
+        for thread in sm_threads:
+            thread.join()
 
-        dc_report  = dc.reports[0]
+        dc_report = dc.reports[0]
         sm_reports = tuple([sm.reports[0] for sm in sms])
 
         yield dc_report, sm_reports

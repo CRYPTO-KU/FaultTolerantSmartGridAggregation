@@ -1,27 +1,26 @@
 import secrets
+from abc import ABC, abstractmethod
+from time import sleep
+from time import time as now
+from typing import Any, Dict, Tuple
 
-from abc            import ABC, abstractmethod
-
-from time           import sleep
-from time           import time as now
-
-from util.network   import NetworkManager
-from util           import log
-from util           import prf
-from util           import time
-from util           import paillier
-
-from typing         import Any, Dict, Tuple
-
-from model.metadata import Metadata
-from model.metadata import SMMaskingMetadata, is_valid_sm_masking_metadata
-from model.metadata import SMPaillierMetadata, is_valid_sm_paillier_metadata
-from model.report   import SMReport
+from model.metadata import (
+    Metadata,
+    SMMaskingMetadata,
+    SMPaillierMetadata,
+    is_valid_sm_masking_metadata,
+    is_valid_sm_paillier_metadata,
+)
+from model.report import SMReport
+from util import log, paillier, prf, time
+from util.network import NetworkManager
 
 
 ################################################################################
 # Classes
-# NOTE: Use the factory method to make instances.
+# NOTE:
+# Don't call constructor directly.
+# Use the factory method to make instances.
 ################################################################################
 
 
@@ -29,11 +28,11 @@ from model.report   import SMReport
 # Abstract Class - Use concrete implemententations
 class SM(ABC):
     def __init__(self, id: int, meta: Metadata, net_mngr: NetworkManager):
-        self.id       = id
-        self.meta     = meta
+        self.id = id
+        self.meta = meta
         self.net_mngr = net_mngr
-        self.reports  = []
-        self.killed   = False
+        self.reports = []
+        self.killed = False
 
     def run_forever(self):
         self._listen()
@@ -57,7 +56,7 @@ class SM(ABC):
         log.info("Waiting for operation start...")
         sleep(time.remaining_until(self.meta.t_start))
         log.info("Operation started.")
-        
+
         log.info(f"Round started.")
         self._run_single_round(0)
         log.info(f"Round ended.")
@@ -81,13 +80,15 @@ class SM(ABC):
         round_start = self.meta.t_start + self.meta.t_round_len * round
         sleep(time.remaining_until(round_start))
 
-        self.reports.append(SMReport(t_start = now()))
+        self.reports.append(SMReport(t_start=now()))
 
         passthru, data = self._prep_data(round)
 
         ok = self._run_phase_1(round, data)
         if not ok:
-            log.warning(f"[round {round}] [phase 1] Could not send data to data concentrator. Aborting round...")
+            log.warning(
+                f"[round {round}] [phase 1] Could not send data to data concentrator. Aborting round..."
+            )
             self.reports[round].t_end = now()
             return
 
@@ -101,12 +102,12 @@ class SM(ABC):
     @abstractmethod
     def _prep_data(self, round: int) -> Tuple[Any, Any]:
         pass
-    
+
     def _run_phase_1(self, round: int, data) -> bool:
         round_start = self.meta.t_start + self.meta.t_round_len * round
         phase_1_end = round_start + self.meta.t_phase_1_len
         self.reports[round].net_snd += 1
-        req = { "id": self.id, "round": round, "data": data }
+        req = {"id": self.id, "round": round, "data": data}
         return self.net_mngr.send(self.meta.dc_address, req, phase_1_end)
 
     def _run_phase_2(self, round: int, passthru):
@@ -139,9 +140,10 @@ class SM(ABC):
 
         while not self._is_last(l_rem, l_act):
             # Don't exceed time limit
-            if now() >= phase_2_end: return
+            if now() >= phase_2_end:
+                return
             next_sm = l_rem[0]
-            data = { "round": round, "s": s_new, "l_rem": l_rem, "l_act": l_act }
+            data = {"round": round, "s": s_new, "l_rem": l_rem, "l_act": l_act}
             if self.meta.sm_addresses[next_sm].valid:
                 self.reports[round].net_snd += 1
                 ok = self.net_mngr.send(
@@ -150,7 +152,8 @@ class SM(ABC):
                     phase_2_end,
                 )
                 # We activated the next SM
-                if ok: return
+                if ok:
+                    return
             # We couldn't activate next SM
             # Remove it from the remaining SMs before trying with another one
             l_rem = tuple([sm for sm in l_rem if sm != next_sm])
@@ -158,14 +161,11 @@ class SM(ABC):
         # Report to DC if we reached the minimum participating SMs
         if len(l_rem) + len(l_act) >= self.meta.n_min and self.meta.dc_address.valid:
             # Don't exceed time limit
-            if now() >= phase_2_end: return
-            data = { "round": round, "s": s_new, "l_rem": l_rem, "l_act": l_act }
+            if now() >= phase_2_end:
+                return
+            data = {"round": round, "s": s_new, "l_rem": l_rem, "l_act": l_act}
             self.reports[round].net_snd += 1
-            self.net_mngr.send(
-                self.meta.dc_address,
-                data,
-                phase_2_end
-            )
+            self.net_mngr.send(self.meta.dc_address, data, phase_2_end)
 
     @abstractmethod
     def _aggregate_to_s(self, round: int, req: Dict, passthru):
@@ -177,22 +177,29 @@ class SM(ABC):
             return False
 
         # Round should be correct
-        if req["round"] != round: return False
+        if req["round"] != round:
+            return False
 
-        if not isinstance(req["l_rem"], list): return False
-        if not isinstance(req["l_act"], list): return False
+        if not isinstance(req["l_rem"], list):
+            return False
+        if not isinstance(req["l_act"], list):
+            return False
 
         # If we have an intersection, data is invalid
         intersection = set(req["l_rem"]) & set(req["l_act"])
-        if len(intersection) > 0: return False
+        if len(intersection) > 0:
+            return False
 
         for i in req["l_rem"]:
-            if i not in range(len(self.meta.sm_addresses)): return False
+            if i not in range(len(self.meta.sm_addresses)):
+                return False
 
         for i in req["l_act"]:
-            if i not in range(len(self.meta.sm_addresses)): return False
+            if i not in range(len(self.meta.sm_addresses)):
+                return False
             # We shouldn't be doing phase 2 if we already did it
-            if i == self.id: return False
+            if i == self.id:
+                return False
 
         return True
 
@@ -243,7 +250,9 @@ class PaillierSM(SM):
 
 
 # Construct the correct type of SM based on the given metadata
-def make_sm(id: int, meta: SMMaskingMetadata | SMPaillierMetadata, net_mngr: NetworkManager) -> SM:
+def make_sm(
+    id: int, meta: SMMaskingMetadata | SMPaillierMetadata, net_mngr: NetworkManager
+) -> SM:
     if isinstance(meta, SMMaskingMetadata):
         return MaskingSM(id, meta, net_mngr)
     return PaillierSM(id, meta, net_mngr)
