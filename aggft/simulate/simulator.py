@@ -15,10 +15,9 @@ def simulate(
     make_net_mngr,
     base_dc_meta,
     base_sm_meta,
+    starting_port
 ):
     for c in configurations:
-        net_mngr = make_net_mngr()
-
         test_start = now()
 
         dc = factories.dc_factory(
@@ -26,8 +25,9 @@ def simulate(
             test_start,
             startup_wait,
             base_dc_meta(),
-            net_mngr,
-            c
+            make_net_mngr(),
+            c,
+            starting_port
         )
         dc_thread = threading.Thread(target = dc.run_once)
 
@@ -40,8 +40,9 @@ def simulate(
                 test_start,
                 startup_wait,
                 base_sm_meta(id),
-                net_mngr,
-                c
+                make_net_mngr(),
+                c,
+                starting_port
             )
             sm_thread = threading.Thread(target = sm.run_once)
             sm_threads = (*sm_threads, sm_thread)

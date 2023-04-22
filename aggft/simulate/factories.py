@@ -17,14 +17,14 @@ def dc_factory(
     startup_wait: float,
     base_meta: metadata.DCMaskingMetadata | metadata.DCPaillierMetadata,
     net_mngr: network.NetworkManager,
-    connectivity_table: Dict[Tuple[int, int], bool]
+    connectivity_table: Dict[Tuple[int, int], bool],
+    starting_port: network.Port = -1
 ) -> DC:
 
-    # -1 is for the DC
-    dc_addr = network.Address("localhost", -1, True)
+    dc_addr = network.Address("localhost", starting_port, True)
 
     c = connectivity_table
-    sm_addr = tuple([network.Address("localhost", i, c[(-1, i)]) for i in range(sm_count)])
+    sm_addr = tuple([network.Address("localhost", starting_port + i + 1, c[(-1, i)]) for i in range(sm_count)])
 
     meta = replace(
         base_meta,
@@ -42,15 +42,15 @@ def sm_factory(
     startup_wait: float,
     base_meta: metadata.SMMaskingMetadata | metadata.SMPaillierMetadata,
     net_mngr: network.NetworkManager,
-    connectivity_table: Dict[Tuple[int, int], bool]
+    connectivity_table: Dict[Tuple[int, int], bool],
+    starting_port: network.Port = -1
 ) -> SM:
 
     c = connectivity_table
 
-    # -1 is for the DC
-    dc_addr = network.Address("localhost", -1, c[(-1, id)])
+    dc_addr = network.Address("localhost", starting_port, c[(-1, id)])
 
-    sm_addr = tuple([network.Address("localhost", i, c[(id, i)]) for i in range(sm_count)])
+    sm_addr = tuple([network.Address("localhost", starting_port + i + 1, c[(id, i)]) for i in range(sm_count)])
 
     meta = replace(
         base_meta,

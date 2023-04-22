@@ -15,8 +15,9 @@ from typing      import Any, Dict, Tuple
 # Data Types
 ################################################################################
 
-Host = str
-Port = int
+Host     = str
+Port     = int
+Registry = Dict[Tuple[Host, Port], Queue]
 
 @dataclass(frozen = True)
 class Address:
@@ -52,7 +53,7 @@ class NetworkManager(ABC):
 # Can be used for simulations on one physical machine.
 
 class SharedMemoryNetworkManager(NetworkManager):
-    def __init__(self, registry: Dict[Tuple[Host, Port], Queue]):
+    def __init__(self, registry: Registry):
         self.registry = registry
 
     def send(self, address: Address, data: Dict[str, Any], _) -> bool:
@@ -92,7 +93,7 @@ class HTTPNetworkManager(NetworkManager):
 
         runner = web.AppRunner(app)
         await runner.setup()
-        site = web.TCPSite(runner, "localhost", self.port)
+        site = web.TCPSite(runner, "localhost", self.port, reuse_port = True)
         await site.start()
 
         while self.running:
@@ -116,5 +117,8 @@ class HTTPNetworkManager(NetworkManager):
         client_timeout = aiohttp.ClientTimeout(total = timeout)
         async with aiohttp.ClientSession(timeout = client_timeout) as session:
             url = f"http://{address.host}:{address.port}"
-            async with session.post(url, json = data) as resp:
-                return resp.status == 200
+            try:
+                async with session.post(url, json = data) as resp:
+                    return resp.status == 200
+            except:
+                    return False
