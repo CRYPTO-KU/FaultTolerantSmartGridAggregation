@@ -1,3 +1,4 @@
+import json
 import secrets
 from abc import ABC, abstractmethod
 from time import sleep
@@ -105,8 +106,9 @@ class SM(ABC):
     def _run_phase_1(self, round: int, data) -> bool:
         round_start = self.meta.t_start + self.meta.t_round_len * round
         phase_1_end = round_start + self.meta.t_phase_1_len
-        self.reports[round].net_snd += 1
         req = {"id": self.id, "round": round, "data": data}
+        self.reports[round].net_snd += 1
+        self.reports[round].net_snd_size += len(json.dumps(req))
         return self.net_mngr.send(self.meta.dc_address, req, phase_1_end)
 
     def _run_phase_2(self, round: int, passthru):
@@ -118,8 +120,9 @@ class SM(ABC):
                 sleep(0.1)
                 continue
 
-            self.reports[round].net_rcv += 1
             req = self.req_q.get()
+            self.reports[round].net_rcv += 1
+            self.reports[round].net_rcv_size += len(json.dumps(req))
 
             if self._is_phase_2_request_valid(round, req):
                 self._act_phase_2(round, req, passthru)
@@ -145,6 +148,7 @@ class SM(ABC):
             data = {"round": round, "s": s_new, "l_rem": l_rem, "l_act": l_act}
             if self.meta.sm_addresses[next_sm].valid:
                 self.reports[round].net_snd += 1
+                self.reports[round].net_snd_size += len(json.dumps(data))
                 ok = self.net_mngr.send(
                     self.meta.sm_addresses[next_sm],
                     data,
@@ -164,6 +168,7 @@ class SM(ABC):
                 return
             data = {"round": round, "s": s_new, "l_rem": l_rem, "l_act": l_act}
             self.reports[round].net_snd += 1
+            self.reports[round].net_snd_size += len(json.dumps(data))
             self.net_mngr.send(self.meta.dc_address, data, phase_2_end)
 
     @abstractmethod

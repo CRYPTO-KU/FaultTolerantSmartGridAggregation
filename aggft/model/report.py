@@ -39,6 +39,12 @@ class DCReport:
     # Total network requests sent by DC.
     net_snd: int = 0
 
+    # Total characters received over the network
+    net_rcv_size: int = 0
+
+    # Total characters send over the network
+    net_snd_size: int = 0
+
 
 # Smart Meter (SM) Report
 # SM generates such a report each round.
@@ -56,3 +62,9 @@ class SMReport:
 
     # Total network requests sent by SM.
     net_snd: int = 0
+
+    # Total characters received over the network
+    net_rcv_size: int = 0
+
+    # Total characters send over the network
+    net_snd_size: int = 0

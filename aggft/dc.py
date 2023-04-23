@@ -1,3 +1,4 @@
+import json
 import secrets
 from abc import ABC, abstractmethod
 from time import sleep
@@ -115,8 +116,9 @@ class DC(ABC):
                 sleep(0.1)
                 continue
 
-            self.reports[round].net_rcv += 1
             req = self.req_q.get()
+            self.reports[round].net_rcv += 1
+            self.reports[round].net_rcv_size += len(json.dumps(req))
 
             if self._is_phase_1_request_valid(round, req):
                 data[req["id"]] = self._parse_phase_1_request(round, req)
@@ -167,6 +169,7 @@ class DC(ABC):
             if not address.valid:
                 continue
             self.reports[round].net_snd += 1
+            self.reports[round].net_snd_size += len(json.dumps(data))
             ok = self.net_mngr.send(address, data, phase_2_end)
             if ok:
                 return True
@@ -181,8 +184,9 @@ class DC(ABC):
                 sleep(0.1)
                 continue
 
-            self.reports[round].net_rcv += 1
             req = self.req_q.get()
+            self.reports[round].net_rcv += 1
+            self.reports[round].net_rcv_size += len(json.dumps(req))
 
             if self._is_phase_2_request_valid(round, req):
                 aggregate = self._calc_aggregate(round, data, s_initial, req)

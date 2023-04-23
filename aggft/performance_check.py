@@ -45,7 +45,7 @@ CONSTANTS["STARTING_PORT"] = (
 )
 
 print(
-    "SM COUNT,PRIVACY TYPE,P,Terminated,Success,TOTAL DC TIME,PHASE 1 DC TIME,MAX TOTAL SM TIME,PHASE 1 COUNT,PHASE 2 COUNT"
+    "SM COUNT,PRIVACY TYPE,P,Terminated,Success,TOTAL DC TIME,PHASE 1 DC TIME,MAX TOTAL SM TIME,PHASE 1 COUNT,PHASE 2 COUNT,DC NET SND,DC NET RCV,MAX SM NET SND,MAX SM NET RCV"
 )
 
 for N in CONSTANTS["N_VALUES"]:
@@ -60,6 +60,7 @@ for N in CONSTANTS["N_VALUES"]:
                 "N_MIN": N_MIN,
                 "PRIVACY_TYPE": PRIVACY_TYPE,
                 "P": P,
+                "ROUND_LEN": ROUND_LEN,
             }
 
             # Generate Keys
@@ -109,6 +110,10 @@ for N in CONSTANTS["N_VALUES"]:
                 max_sm_time = max([i.t_end - i.t_start for i in sm_reports])
                 phase_1_cnt = dc_report.phase_1_count
                 phase_2_cnt = dc_report.phase_2_count
+                dc_net_snd = dc_report.net_snd_size
+                dc_net_rcv = dc_report.net_rcv_size
+                max_sm_snd = max([i.net_snd_size for i in sm_reports])
+                max_sm_rcv = max([i.net_rcv_size for i in sm_reports])
                 print(
-                    f"{N},{PRIVACY_TYPE},{P},{terminated},{success},{dc_time},{dc_time_p_1},{max_sm_time},{phase_1_cnt},{phase_2_cnt}"
+                    f"{N},{PRIVACY_TYPE},{P},{terminated},{success},{dc_time},{dc_time_p_1},{max_sm_time},{phase_1_cnt},{phase_2_cnt},{dc_net_snd},{dc_net_rcv},{max_sm_snd},{max_sm_rcv}"
                 )
