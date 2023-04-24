@@ -4,12 +4,12 @@ To run the failure check code:
 
 ```bash
 mkdir -p results
-python3 aggft/failure_check.py > results/failure_check.csv
+./aggft/failure_check.py > results/failure_check.csv
 ```
 
 To run the performance check code:
 
 ```bash
 mkdir -p results
-python3 aggft/performance_check.py > results/performance_check.csv
+./aggft/parallel_performance_check.rb 1008 24 > results/performance_check.csv
 ```
