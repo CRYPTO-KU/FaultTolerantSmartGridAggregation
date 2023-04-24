@@ -11,14 +11,16 @@ from util import network
 # Simulation Parameters
 ################################################################################
 
-stringify = lambda iterable : ' '.join(map(lambda i : str(i), iterable))
+stringify = lambda iterable: " ".join(map(lambda i: str(i), iterable))
 
-parser = argparse.ArgumentParser(description = "Run the performance check simulations for AggFT.")
+parser = argparse.ArgumentParser(
+    description="Run the performance check simulations for AggFT."
+)
 
 parser.add_argument(
     "RUNS_PER_CONFIG",
-    type = int,
-    help = f"The number of times to simulate each configuration."
+    type=int,
+    help=f"The number of times to simulate each configuration.",
 )
 
 argv = parser.parse_args()
