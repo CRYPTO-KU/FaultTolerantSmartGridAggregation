@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+import argparse
 import random
 
 from phe import paillier
@@ -8,6 +11,17 @@ from util import network
 # Simulation Parameters
 ################################################################################
 
+stringify = lambda iterable : ' '.join(map(lambda i : str(i), iterable))
+
+parser = argparse.ArgumentParser(description = "Run the performance check simulations for AggFT.")
+
+parser.add_argument(
+    "RUNS_PER_CONFIG",
+    type = int,
+    help = f"The number of times to simulate each configuration."
+)
+
+argv = parser.parse_args()
 
 # NOTE:
 # Using HTTP with a large number of smart meters might not work due to OS
@@ -22,7 +36,7 @@ CONSTANTS = {
     "K": int(2e20),
     "PRF_KEY_LEN": 32,
     "PAILLIER_KEY_LEN": 256,
-    "RUNS_PER_CONFIG": 1,
+    "RUNS_PER_CONFIG": argv.RUNS_PER_CONFIG,
     "STARTUP_WAIT": 0.1,
     "PHASE_1_LEN": 1.0,
     "SEED": 0,
@@ -42,10 +56,6 @@ random.seed(CONSTANTS["SEED"])
 # Set starting port
 CONSTANTS["STARTING_PORT"] = (
     CONSTANTS["HTTP_STARTING_PORT"] if CONSTANTS["USE_HTTP"] else -1
-)
-
-print(
-    "SM COUNT,PRIVACY TYPE,P,Terminated,Success,TOTAL DC TIME,PHASE 1 DC TIME,MAX TOTAL SM TIME,PHASE 1 COUNT,PHASE 2 COUNT,DC NET SND,DC NET RCV,MAX SM NET SND,MAX SM NET RCV"
 )
 
 for N in CONSTANTS["N_VALUES"]:
