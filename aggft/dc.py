@@ -161,18 +161,21 @@ class DC(ABC):
         pass
 
     def _activate_first_sm(self, round: int, s_initial, l_rem: Tuple[int, ...]) -> bool:
-        data = {"round": round, "s": s_initial, "l_rem": l_rem, "l_act": []}
         round_start = self.meta.t_start + self.meta.t_round_len * round
         phase_2_end = round_start + self.meta.t_round_len
-        for sm_id in l_rem:
+        while len(l_rem) > 0:
+            data = {"round": round, "s": s_initial, "l_rem": l_rem, "l_act": []}
+            sm_id = l_rem[0]
             address = self.meta.sm_addresses[sm_id]
             if not address.valid:
+                l_rem = l_rem[1:]
                 continue
             self.reports[round].net_snd += 1
             self.reports[round].net_snd_size += len(json.dumps(data))
             ok = self.net_mngr.send(address, data, phase_2_end)
             if ok:
                 return True
+            l_rem = l_rem[1:]
         return False
 
     def _run_phase_2(self, round: int, data: Dict, s_initial):
