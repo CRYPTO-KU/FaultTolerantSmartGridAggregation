@@ -162,7 +162,7 @@ class SM(ABC):
             l_rem = tuple([sm for sm in l_rem if sm != next_sm])
 
         # Report to DC if we reached the minimum participating SMs
-        if len(l_rem) + len(l_act) >= self.meta.n_min and self.meta.dc_address.valid:
+        if len(l_act) >= self.meta.n_min and self.meta.dc_address.valid:
             # Don't exceed time limit
             if now() >= phase_2_end:
                 return
