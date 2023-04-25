@@ -159,7 +159,7 @@ class SM(ABC):
                     return
             # We couldn't activate next SM
             # Remove it from the remaining SMs before trying with another one
-            l_rem = tuple([sm for sm in l_rem if sm != next_sm])
+            l_rem = l_rem[1:]
 
         # Report to DC if we reached the minimum participating SMs
         if len(l_act) >= self.meta.n_min and self.meta.dc_address.valid:
@@ -192,6 +192,10 @@ class SM(ABC):
         # If we have an intersection, data is invalid
         intersection = set(req["l_rem"]) & set(req["l_act"])
         if len(intersection) > 0:
+            return False
+
+        # We shouldn't be doing phase 2 if we didn't do phase 1
+        if self.id not in req["l_rem"]:
             return False
 
         for i in req["l_rem"]:
