@@ -24,6 +24,8 @@
           rich
         ]);
 
+      rubyEnv = pkgs.ruby.withPackages (rubyPkgs: [rubyPkgs.optimist]);
+
       format-code = with pkgs;
         writeShellScriptBin "format-code" ''
           ${ourPython.pkgs.isort}/bin/isort aggft
@@ -34,7 +36,7 @@
       devShell = pkgs.mkShell {
         nativeBuildInputs = with pkgs; [
           pythonEnv
-          ruby
+          rubyEnv
           format-code
         ];
         buildInputs = [];
