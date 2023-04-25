@@ -120,7 +120,7 @@ class DC(ABC):
             self.reports[round].net_rcv += 1
             self.reports[round].net_rcv_size += len(json.dumps(req))
 
-            if self._is_phase_1_request_valid(round, req):
+            if self._is_phase_1_request_valid(round, req) and req["id"] not in l_rem:
                 data[req["id"]] = self._parse_phase_1_request(round, req)
                 l_rem.append(req["id"])
 
@@ -239,7 +239,7 @@ class MaskingDC(DC):
         self.meta = meta
 
     def _specific_is_phase_1_request_valid(self, round: int, req: Dict) -> bool:
-        return isinstance(req["data"], int)
+        return "data" in req and isinstance(req["data"], int)
 
     def _parse_phase_1_request(self, round: int, req: Dict) -> Dict:
         return {
