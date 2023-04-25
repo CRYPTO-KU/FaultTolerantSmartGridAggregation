@@ -11,5 +11,5 @@ To run the performance check code:
 
 ```bash
 mkdir -p results
-./aggft/parallel_performance_check.rb 1008 24 > results/performance_check.csv
+./aggft/parallel_performance_check.rb -r 1008 -p 24 > results/performance_check.csv
 ```
