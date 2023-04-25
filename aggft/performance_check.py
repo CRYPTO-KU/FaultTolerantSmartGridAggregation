@@ -83,14 +83,18 @@ for N in CONSTANTS["N_VALUES"]:
                 }
 
                 # Generate Keys
-                prf_keys = tuple([random.randbytes(args["PRF_KEY_LEN"]) for _ in range(N)])
+                prf_keys = tuple(
+                    [random.randbytes(args["PRF_KEY_LEN"]) for _ in range(N)]
+                )
                 pk, sk = paillier.generate_paillier_keypair(
                     n_length=CONSTANTS["PAILLIER_KEY_LEN"]
                 )
 
                 args = {**args, "prf_keys": prf_keys, "pk": pk, "sk": sk}
 
-                registry = None if CONSTANTS["USE_HTTP"] else shared_mem.make_registry(N)
+                registry = (
+                    None if CONSTANTS["USE_HTTP"] else shared_mem.make_registry(N)
+                )
 
                 # Helper functions
                 base_dc_meta = (
