@@ -1,0 +1,20 @@
+Labels for performance evaluation
+----------------------------------
+
+phase 1 is before the aggregation along the smart meters
+phase 2 is the aggregation along the smart meters
+
+SM COUNT: 50/100/200/400
+PRIVACY TYPE: Possible values: mask or encr
+P: probability of failure
+Terminated: did the algorithm terminate? Possible values: 1 or 0. Should be always 1.
+Success: did the algorithm provide an aggregate (nmin)? Possible values:  1 or 0
+TOTAL DC TIME: total computation time of the DC float
+PHASE 1 DC TIME: total computation time of the DC in phase 1
+MAX TOTAL SM TIME : maximum total computation time of a smart meter in one simulation
+PHASE 1 COUNT: number of rounds in phase 1
+PHASE 2 COUNT: number of rounds in phase 2
+DC NET SND: number of messages that the DC sends in one simulation
+DC NET RCV: number of messages that the DC receives in one simulation
+MAX SM NET SND: maximum number of messages that a smart meter sends in one simulation
+MAX SM NET RCV: maximum number of messages that a smart meter receives in one simulation
