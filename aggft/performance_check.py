@@ -52,11 +52,15 @@ CONSTANTS = {
 ################################################################################
 
 
+# Calculate the mean
+def avg(lst):
+    return sum(lst) / len(lst)
+
 # Calculate sample standard deviation
 def std(lst):
     n = len(lst)
-    s = sum(lst)
-    return (sum((x - (s / n)) ** 2 for x in lst) / n) ** 0.5
+    a = avg(lst)
+    return (sum((x - a) ** 2 for x in lst) / n) ** 0.5
 
 # Set random seed
 random.seed(CONSTANTS["SEED"])
