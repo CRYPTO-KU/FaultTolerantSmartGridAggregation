@@ -1,20 +1,23 @@
 Labels for performance evaluation
 ----------------------------------
+    Each row represents one run of one configuration / setting.
+    Different rows with the same configuration will have different link failures, but they were randomly selected with the same probability.
 
-phase 1 is before the aggregation along the smart meters
+phase 1 is the part before the aggregation along the smart meters
 phase 2 is the aggregation along the smart meters
 
 SM COUNT: 50/100/200/400
-PRIVACY TYPE: Possible values: mask or encr
-P: probability of failure
-Terminated: did the algorithm terminate? Possible values: 1 or 0. Should be always 1.
-Success: did the algorithm provide an aggregate (nmin)? Possible values:  1 or 0
-TOTAL DC TIME: total computation time of the DC float
-PHASE 1 DC TIME: total computation time of the DC in phase 1
-MAX TOTAL SM TIME : maximum total computation time of a smart meter in one simulation
-PHASE 1 COUNT: number of rounds in phase 1
-PHASE 2 COUNT: number of rounds in phase 2
-DC NET SND: number of messages that the DC sends in one simulation
-DC NET RCV: number of messages that the DC receives in one simulation
-MAX SM NET SND: maximum number of messages that a smart meter sends in one simulation
-MAX SM NET RCV: maximum number of messages that a smart meter receives in one simulation
+PRIVACY TYPE: Possible values: mask or encr. Mask for masking, and encr for homomorphic encryption
+P: probability of failure  for each link.
+Terminated: 1 if terminated successfully (aggregate not necessarily obtained), 0 otherwise.
+Success: 1 if aggregate obtained, 0 otherwise.
+TOTAL DC TIME: Total time from round start till round end on the DC.
+PHASE 1 DC TIME: Total time from round start till phase 1 end on the DC. We can get the time of phase 2 by (TOTAL DC TIME - PHASE 1 DC TIME).
+MAX TOTAL SM TIME :The maximum total time took by one of the SMs (from round start to end).
+PHASE 1 COUNT: Number of smart meters who sent data to DC in phase 1.
+PHASE 2 COUNT: Number of smart meters who were in L_ACT in the end of the round.
+DC NET SND: The number of bytes sent by DC in the round (not number of messages).
+DC NET RCV: The number of bytes received by DC in the round.
+MAX SM NET SND: Max bytes sent by an SM in that round.
+MAX SM NET RCV: Max bytes received by an SM in that round.
+
