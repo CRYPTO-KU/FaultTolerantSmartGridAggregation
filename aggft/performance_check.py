@@ -11,7 +11,7 @@ from util import network
 # Simulation Parameters
 ################################################################################
 
-stringify = lambda iterable: " ".join(map(lambda i: str(i), iterable))
+stringify = lambda iterable : ",".join(map(lambda i: str(i), iterable))
 
 parser = argparse.ArgumentParser(
     description="Run the performance check simulations for AggFT."
@@ -51,6 +51,12 @@ CONSTANTS = {
 # Simulation Logic
 ################################################################################
 
+
+# Calculate sample standard deviation
+def std(lst):
+    n = len(lst)
+    s = sum(lst)
+    return (sum((x - (s / n)) ** 2 for x in lst) / n) ** 0.5
 
 # Set random seed
 random.seed(CONSTANTS["SEED"])
@@ -128,12 +134,64 @@ for N in CONSTANTS["N_VALUES"]:
                 dc_time = dc_report.t_end - dc_report.t_start
                 dc_time_p_1 = dc_report.t_phase_1 - dc_report.t_start
                 max_sm_time = max([i.t_end - i.t_start for i in sm_reports])
+                min_sm_time = min([i.t_end - i.t_start for i in sm_reports])
+                avg_sm_time = avg([i.t_end - i.t_start for i in sm_reports])
+                std_sm_time = std([i.t_end - i.t_start for i in sm_reports])
                 phase_1_cnt = dc_report.phase_1_count
                 phase_2_cnt = dc_report.phase_2_count
-                dc_net_snd = dc_report.net_snd_size
-                dc_net_rcv = dc_report.net_rcv_size
-                max_sm_snd = max([i.net_snd_size for i in sm_reports])
-                max_sm_rcv = max([i.net_rcv_size for i in sm_reports])
-                print(
-                    f"{N},{PRIVACY_TYPE},{P},{terminated},{success},{dc_time},{dc_time_p_1},{max_sm_time},{phase_1_cnt},{phase_2_cnt},{dc_net_snd},{dc_net_rcv},{max_sm_snd},{max_sm_rcv}"
-                )
+                dc_net_snd_count = dc_report.net_snd
+                dc_net_snd_size  = dc_report.net_snd_size
+                dc_net_rcv_count = dc_report.net_rcv
+                dc_net_rcv_size  = dc_report.net_rcv_size
+                max_sm_snd_count = max([i.net_snd for i in sm_reports])
+                max_sm_snd_size  = max([i.net_snd_size for i in sm_reports])
+                max_sm_rcv_count = max([i.net_rcv for i in sm_reports])
+                max_sm_rcv_size  = max([i.net_rcv_size for i in sm_reports])
+                min_sm_snd_count = min([i.net_snd for i in sm_reports])
+                min_sm_snd_size  = min([i.net_snd_size for i in sm_reports])
+                min_sm_rcv_count = min([i.net_rcv for i in sm_reports])
+                min_sm_rcv_size  = min([i.net_rcv_size for i in sm_reports])
+                avg_sm_snd_count = avg([i.net_snd for i in sm_reports])
+                avg_sm_snd_size  = avg([i.net_snd_size for i in sm_reports])
+                avg_sm_rcv_count = avg([i.net_rcv for i in sm_reports])
+                avg_sm_rcv_size  = avg([i.net_rcv_size for i in sm_reports])
+                std_sm_snd_count = std([i.net_snd for i in sm_reports])
+                std_sm_snd_size  = std([i.net_snd_size for i in sm_reports])
+                std_sm_rcv_count = std([i.net_rcv for i in sm_reports])
+                std_sm_rcv_size  = std([i.net_rcv_size for i in sm_reports])
+                output = [
+                    N,
+                    PRIVACY_TYPE,
+                    P,
+                    terminated,
+                    success,
+                    dc_time,
+                    dc_time_p_1,
+                    max_sm_time,
+                    min_sm_time,
+                    avg_sm_time,
+                    std_sm_time,
+                    phase_1_cnt,
+                    phase_2_cnt,
+                    dc_net_snd_count,
+                    dc_net_snd_size,
+                    dc_net_rcv_count,
+                    dc_net_rcv_size,
+                    max_sm_snd_count,
+                    max_sm_snd_size,
+                    max_sm_rcv_count,
+                    max_sm_rcv_size,
+                    min_sm_snd_count,
+                    min_sm_snd_size,
+                    min_sm_rcv_count,
+                    min_sm_rcv_size,
+                    avg_sm_snd_count,
+                    avg_sm_snd_size,
+                    avg_sm_rcv_count,
+                    avg_sm_rcv_size,
+                    std_sm_snd_count,
+                    std_sm_snd_size,
+                    std_sm_rcv_count,
+                    std_sm_rcv_size
+                ]
+                print(stringify(output))
