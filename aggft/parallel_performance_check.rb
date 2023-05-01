@@ -21,6 +21,8 @@ STDERR.puts "TMP DIR         : #{tmp_dir}"
 # Print CSV header
 HEADER = [
   "SM COUNT",
+  "N MIN CONSTANT",
+  "N MIN",
   "PRIVACY TYPE",
   "P",
   "Terminated",
