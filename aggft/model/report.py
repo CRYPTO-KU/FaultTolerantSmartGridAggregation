@@ -36,14 +36,20 @@ class DCReport:
     # Total network requests received by DC.
     net_rcv: int = 0
 
-    # Total network requests sent by DC.
-    net_snd: int = 0
-
-    # Total characters received over the network
+    # Total characters received over the network.
     net_rcv_size: int = 0
 
-    # Total characters send over the network
-    net_snd_size: int = 0
+    # Total successful network requests sent by DC.
+    net_snd_succ: int = 0
+
+    # Total successful characters send over the network.
+    net_snd_succ_size: int = 0
+
+    # Total failed network requests sent by DC.
+    net_snd_fail: int = 0
+
+    # Total failed characters send over the network.
+    net_snd_fail_size: int = 0
 
 
 # Smart Meter (SM) Report
@@ -60,11 +66,17 @@ class SMReport:
     # Total network requests received by SM.
     net_rcv: int = 0
 
-    # Total network requests sent by SM.
-    net_snd: int = 0
-
-    # Total characters received over the network
+    # Total characters received over the network.
     net_rcv_size: int = 0
 
-    # Total characters send over the network
-    net_snd_size: int = 0
+    # Total successful network requests sent by SM.
+    net_snd_succ: int = 0
+
+    # Total successful characters send over the network.
+    net_snd_succ_size: int = 0
+
+    # Total failed network requests sent by SM.
+    net_snd_fail: int = 0
+
+    # Total failed characters send over the network.
+    net_snd_fail_size: int = 0

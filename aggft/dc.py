@@ -170,11 +170,13 @@ class DC(ABC):
             if not address.valid:
                 l_rem = l_rem[1:]
                 continue
-            self.reports[round].net_snd += 1
-            self.reports[round].net_snd_size += len(json.dumps(data))
             ok = self.net_mngr.send(address, data, phase_2_end)
             if ok:
+                self.reports[round].net_snd_succ += 1
+                self.reports[round].net_snd_succ_size += len(json.dumps(data))
                 return True
+            self.reports[round].net_snd_fail += 1
+            self.reports[round].net_snd_fail_size += len(json.dumps(data))
             l_rem = l_rem[1:]
         return False
 

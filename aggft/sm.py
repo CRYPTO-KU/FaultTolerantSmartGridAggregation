@@ -107,9 +107,14 @@ class SM(ABC):
         round_start = self.meta.t_start + self.meta.t_round_len * round
         phase_1_end = round_start + self.meta.t_phase_1_len
         req = {"id": self.id, "round": round, "data": data}
-        self.reports[round].net_snd += 1
-        self.reports[round].net_snd_size += len(json.dumps(req))
-        return self.net_mngr.send(self.meta.dc_address, req, phase_1_end)
+        ok = self.net_mngr.send(self.meta.dc_address, req, phase_1_end)
+        if ok:
+            self.reports[round].net_snd_succ += 1
+            self.reports[round].net_snd_succ_size += len(json.dumps(req))
+        else:
+            self.reports[round].net_snd_fail += 1
+            self.reports[round].net_snd_fail_size += len(json.dumps(req))
+        return ok
 
     def _run_phase_2(self, round: int, passthru):
         round_start = self.meta.t_start + self.meta.t_round_len * round
@@ -147,8 +152,6 @@ class SM(ABC):
             next_sm = l_rem[0]
             data = {"round": round, "s": s_new, "l_rem": l_rem, "l_act": l_act}
             if self.meta.sm_addresses[next_sm].valid:
-                self.reports[round].net_snd += 1
-                self.reports[round].net_snd_size += len(json.dumps(data))
                 ok = self.net_mngr.send(
                     self.meta.sm_addresses[next_sm],
                     data,
@@ -156,7 +159,11 @@ class SM(ABC):
                 )
                 # We activated the next SM
                 if ok:
+                    self.reports[round].net_snd_succ += 1
+                    self.reports[round].net_snd_succ_size += len(json.dumps(data))
                     return
+                self.reports[round].net_snd_fail += 1
+                self.reports[round].net_snd_fail_size += len(json.dumps(data))
             # We couldn't activate next SM
             # Remove it from the remaining SMs before trying with another one
             l_rem = l_rem[1:]
@@ -167,9 +174,13 @@ class SM(ABC):
             if now() >= phase_2_end:
                 return
             data = {"round": round, "s": s_new, "l_rem": l_rem, "l_act": l_act}
-            self.reports[round].net_snd += 1
-            self.reports[round].net_snd_size += len(json.dumps(data))
-            self.net_mngr.send(self.meta.dc_address, data, phase_2_end)
+            ok = self.net_mngr.send(self.meta.dc_address, data, phase_2_end)
+            if ok:
+                self.reports[round].net_snd_succ += 1
+                self.reports[round].net_snd_succ_size += len(json.dumps(data))
+            else:
+                self.reports[round].net_snd_fail += 1
+                self.reports[round].net_snd_fail_size += len(json.dumps(data))
 
     @abstractmethod
     def _aggregate_to_s(self, round: int, req: Dict, passthru):
