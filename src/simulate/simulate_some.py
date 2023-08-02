@@ -9,6 +9,7 @@ from validate import validate_spec
 from simulate_one import simulate_one_mask, simulate_one_homomorphic
 from utils import generate_link_status, generate_sm_status
 
+
 def main():
     args = parse_args()
     spec = get_spec(args)
@@ -18,6 +19,7 @@ def main():
     random.seed(spec["random-seed"])
 
     simulate(spec)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -32,8 +34,10 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def get_spec(args):
     return json.loads(args.spec.read())
+
 
 def simulate(spec):
     if "mask" in spec["privacy-types"]:
@@ -57,7 +61,7 @@ def simulate(spec):
         spec["dc-link-failure-probabilities"],
         spec["sm-link-failure-probabilities"],
         spec["sm-full-failure-probabilities"],
-        spec["privacy-types"]
+        spec["privacy-types"],
     )
 
     for n, n_min_const, *failure_probs, privacy_type in configs:
@@ -68,17 +72,9 @@ def simulate(spec):
         dc_link_fail_p, sm_link_fail_p, sm_full_fail_p = failure_probs
 
         link_status = generate_link_status(
-            n,
-            dc_link_fail_p,
-            sm_link_fail_p,
-            dc_link_fail_exact,
-            sm_link_fail_exact
+            n, dc_link_fail_p, sm_link_fail_p, dc_link_fail_exact, sm_link_fail_exact
         )
-        sm_status = generate_sm_status(
-            n,
-            sm_full_fail_p,
-            sm_full_fail_exact
-        )
+        sm_status = generate_sm_status(n, sm_full_fail_p, sm_full_fail_exact)
 
         for _ in range(spec["simulations-per-config"]):
             if privacy_type == "mask":
@@ -91,7 +87,7 @@ def simulate(spec):
                     round_len,
                     phase_1_len,
                     prf_key_len,
-                    masking_modulus
+                    masking_modulus,
                 )
             else:
                 dc_report, sm_reports = simulate_one_homomorphic(
@@ -102,7 +98,7 @@ def simulate(spec):
                     startup_wait,
                     round_len,
                     phase_1_len,
-                    homomorphic_key_len
+                    homomorphic_key_len,
                 )
 
             report(
@@ -119,7 +115,8 @@ def simulate(spec):
                 link_status,
                 sm_status,
                 dc_report,
-                sm_reports
+                sm_reports,
             )
+
 
 main()

@@ -20,34 +20,22 @@ def simulate_one_mask(
     round_len,
     phase_1_len,
     prf_key_len,
-    masking_modulus
+    masking_modulus,
 ):
     prf_keys = [aggft.crypto.generate_prf_key(prf_key_len) for _ in range(n)]
 
     base_dc_meta = utils.base_dc_masking_meta(
-        n_min,
-        round_len,
-        phase_1_len,
-        masking_modulus,
-        prf_keys
+        n_min, round_len, phase_1_len, masking_modulus, prf_keys
     )
 
     base_sm_meta = utils.base_sm_masking_meta(
-        n_min,
-        round_len,
-        phase_1_len,
-        masking_modulus,
-        prf_keys
+        n_min, round_len, phase_1_len, masking_modulus, prf_keys
     )
 
     return simulate_one(
-        n,
-        link_status,
-        sm_status,
-        startup_wait,
-        base_dc_meta,
-        base_sm_meta
+        n, link_status, sm_status, startup_wait, base_dc_meta, base_sm_meta
     )
+
 
 def simulate_one_homomorphic(
     n,
@@ -57,43 +45,20 @@ def simulate_one_homomorphic(
     startup_wait,
     round_len,
     phase_1_len,
-    homomorphic_key_len
+    homomorphic_key_len,
 ):
     sk, pk = aggft.crypto.generate_homomorphic_keypair(homomorphic_key_len)
 
-    base_dc_meta = utils.base_dc_homomorphic_meta(
-        n_min,
-        round_len,
-        phase_1_len,
-        sk,
-        pk
-    )
+    base_dc_meta = utils.base_dc_homomorphic_meta(n_min, round_len, phase_1_len, sk, pk)
 
-    base_sm_meta = utils.base_sm_homomorphic_meta(
-        n_min,
-        round_len,
-        phase_1_len,
-        pk
-    )
+    base_sm_meta = utils.base_sm_homomorphic_meta(n_min, round_len, phase_1_len, pk)
 
     return simulate_one(
-        n,
-        link_status,
-        sm_status,
-        startup_wait,
-        base_dc_meta,
-        base_sm_meta
+        n, link_status, sm_status, startup_wait, base_dc_meta, base_sm_meta
     )
 
 
-def simulate_one(
-    n,
-    link_status,
-    sm_status,
-    startup_wait,
-    base_dc_meta,
-    base_sm_meta
-):
+def simulate_one(n, link_status, sm_status, startup_wait, base_dc_meta, base_sm_meta):
     registry = utils.make_registry(n)
 
     test_start = now()
@@ -105,7 +70,7 @@ def simulate_one(
         base_dc_meta,
         utils.make_net_mngr(-1, registry, link_status, sm_status),
         link_status,
-        sm_status
+        sm_status,
     )
     dc_thread = threading.Thread(target=dc.run_once)
 
@@ -113,7 +78,8 @@ def simulate_one(
     sm_threads = []
     for id in range(n):
         # Don't create failed smart meters
-        if not sm_status[id]: continue
+        if not sm_status[id]:
+            continue
 
         sm = utils.sm_factory(
             id,
@@ -123,7 +89,7 @@ def simulate_one(
             base_sm_meta(id),
             utils.make_net_mngr(id, registry, link_status, sm_status),
             link_status,
-            sm_status
+            sm_status,
         )
         sm_thread = threading.Thread(target=sm.run_once)
         sm_threads.append(sm_thread)

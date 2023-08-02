@@ -65,7 +65,9 @@ class SharedMemoryNetworkManager(NetworkManager):
         self.sm_status = sm_status
 
     def send(self, address: Address, data: Dict[str, Any], _) -> bool:
-        if self.link_status[(self.id, address.port)] and (address.port == -1 or self.sm_status[address.port]):
+        if self.link_status[(self.id, address.port)] and (
+            address.port == -1 or self.sm_status[address.port]
+        ):
             self.registry[(address.host, address.port)].put(
                 json.loads(json.dumps(data))
             )

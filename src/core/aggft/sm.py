@@ -72,7 +72,7 @@ class SM(ABC):
         round_start = self.meta.t_start + self.meta.t_round_len * round
         sleep(time.remaining_until(round_start))
 
-        self.reports.append(SMReport(id = self.id, t_start=now()))
+        self.reports.append(SMReport(id=self.id, t_start=now()))
 
         passthru, data = self._prep_data(round)
 

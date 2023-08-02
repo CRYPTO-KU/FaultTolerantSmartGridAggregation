@@ -10,25 +10,27 @@ from aggft import sm, dc, metadata, network
 # Shared Memory Networking Helpers
 ################################################################################
 
+
 def make_registry(sm_count: int) -> network.Registry:
     registry = {}
     for i in range(-1, sm_count):
         registry[("localhost", i)] = Queue()
     return registry
 
-def make_net_mngr(id, registry: network.Registry, link_status, sm_status) -> network.SharedMemoryNetworkManager:
-        return network.SharedMemoryNetworkManager(id, registry, link_status, sm_status)
+
+def make_net_mngr(
+    id, registry: network.Registry, link_status, sm_status
+) -> network.SharedMemoryNetworkManager:
+    return network.SharedMemoryNetworkManager(id, registry, link_status, sm_status)
+
 
 ################################################################################
 # Failures Helpers
 ################################################################################
 
+
 def generate_link_status(
-    n,
-    dc_link_fail_prob,
-    sm_link_fail_prob,
-    dc_link_fail_exact,
-    sm_link_fail_exact
+    n, dc_link_fail_prob, sm_link_fail_prob, dc_link_fail_exact, sm_link_fail_exact
 ):
     status = {}
 
@@ -38,7 +40,9 @@ def generate_link_status(
         dc_link_status = [False] * dc_link_fails + [True] * (n - dc_link_fails)
         random.shuffle(dc_link_status)
     else:
-        dc_link_status = [False if random.random() <= dc_link_fail_prob else True for _ in range(n)]
+        dc_link_status = [
+            False if random.random() <= dc_link_fail_prob else True for _ in range(n)
+        ]
 
     for i in range(0, n):
         status[(i, -1)] = status[(-1, i)] = dc_link_status[i]
@@ -47,10 +51,15 @@ def generate_link_status(
     sm_link_count = int(n * (n - 1) / 2)
     if sm_link_fail_exact:
         sm_link_fails = int(sm_link_fail_prob * sm_link_count)
-        sm_link_status = [False] * sm_link_fails + [True] * (sm_link_count - sm_link_fails)
+        sm_link_status = [False] * sm_link_fails + [True] * (
+            sm_link_count - sm_link_fails
+        )
         random.shuffle(sm_link_status)
     else:
-        sm_link_status = [False if random.random() <= sm_link_fail_prob else True for _ in range(sm_link_count)]
+        sm_link_status = [
+            False if random.random() <= sm_link_fail_prob else True
+            for _ in range(sm_link_count)
+        ]
 
     sm_link_idx = 0
     for i in range(0, n):
@@ -64,9 +73,12 @@ def generate_link_status(
 
     return status
 
+
 def generate_sm_status(n, sm_full_fail_prob, sm_full_fail_exact):
     if not sm_full_fail_exact:
-        return [False if random.random() <= sm_full_fail_prob else True for _ in range(n)]
+        return [
+            False if random.random() <= sm_full_fail_prob else True for _ in range(n)
+        ]
 
     sm_fails = int(sm_full_fail_prob * n)
     sm_status = [False] * sm_fails + [True] * (n - sm_fails)
@@ -74,9 +86,11 @@ def generate_sm_status(n, sm_full_fail_prob, sm_full_fail_exact):
 
     return sm_status
 
+
 ################################################################################
 # Base Metadata
 ################################################################################
+
 
 def base_dc_masking_meta(n_min, round_len, phase_1_len, masking_modulus, prf_keys):
     return metadata.DCMaskingMetadata(
@@ -88,8 +102,9 @@ def base_dc_masking_meta(n_min, round_len, phase_1_len, masking_modulus, prf_key
         round_len,
         phase_1_len,
         masking_modulus,
-        prf_keys
+        prf_keys,
     )
+
 
 def base_sm_masking_meta(n_min, round_len, phase_1_len, masking_modulus, prf_keys):
     def inner(id: int):
@@ -102,10 +117,11 @@ def base_sm_masking_meta(n_min, round_len, phase_1_len, masking_modulus, prf_key
             round_len,
             phase_1_len,
             masking_modulus,
-            prf_keys[id]
+            prf_keys[id],
         )
 
     return inner
+
 
 def base_dc_homomorphic_meta(n_min, round_len, phase_1_len, sk, pk):
     return metadata.DCHomomorphicMetadata(
@@ -117,8 +133,9 @@ def base_dc_homomorphic_meta(n_min, round_len, phase_1_len, sk, pk):
         round_len,
         phase_1_len,
         pk,
-        sk
+        sk,
     )
+
 
 def base_sm_homomorphic_meta(n_min, round_len, phase_1_len, pk):
     def inner(_: int):
@@ -130,10 +147,11 @@ def base_sm_homomorphic_meta(n_min, round_len, phase_1_len, pk):
             0,  # Will be set by the DC factory
             round_len,
             phase_1_len,
-            pk
+            pk,
         )
 
     return inner
+
 
 ################################################################################
 # DC / SM Factories
@@ -147,7 +165,7 @@ def dc_factory(
     base_meta: metadata.DCMaskingMetadata | metadata.DCHomomorphicMetadata,
     net_mngr: network.NetworkManager,
     link_status: Dict[Tuple[int, int], bool],
-    sm_status: List[bool]
+    sm_status: List[bool],
 ) -> dc.DC:
     dc_addr = network.Address("localhost", -1, True)
 
@@ -171,7 +189,7 @@ def sm_factory(
     base_meta: metadata.SMMaskingMetadata | metadata.SMHomomorphicMetadata,
     net_mngr: network.NetworkManager,
     link_status: Dict[Tuple[int, int], bool],
-    sm_status: List[bool]
+    sm_status: List[bool],
 ) -> sm.SM:
     dc_addr = network.Address("localhost", -1, True)
 

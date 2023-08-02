@@ -1,5 +1,6 @@
 import sys
 
+
 def validate_spec(spec):
     key = "simulations-per-config"
     require(spec, key)
@@ -75,38 +76,48 @@ def validate_spec(spec):
     if spec[key] >= spec[cmp]:
         sys.exit(f"ERROR: {key} should be strictly less than {cmp}.")
 
+
 ################################################################################
 # Primitive Type Helpers
 ################################################################################
 
+
 def is_int(x):
     return isinstance(x, int) or (isinstance(x, float) and int(x) == x)
+
 
 def is_float(x):
     return isinstance(x, float) or isinstance(x, int)
 
+
 def is_bool(x):
     return isinstance(x, bool)
+
 
 def is_str(x):
     return isinstance(x, str)
 
+
 def is_list(x):
     return isinstance(x, list)
+
 
 ################################################################################
 # Validation Helpers
 ################################################################################
+
 
 # Require a key to be defined in the spec
 def require(spec, key):
     if key not in spec:
         sys.exit(f"ERROR: {key} not found in spec.")
 
+
 # Require value to be a boolean
 def require_bool(spec, key):
     if not is_bool(spec[key]):
         sys.exit(f"ERROR: {key} is not a boolean.")
+
 
 # Require value to be an integer and larger than or equal to x
 def require_int_leq(spec, key, x):
@@ -116,12 +127,14 @@ def require_int_leq(spec, key, x):
         sys.exit(f"ERROR: {key} should be larger than or equal to {x}.")
     spec[key] = int(spec[key])
 
+
 def require_float_l(spec, key, x):
     if not is_float(spec[key]):
         sys.exit(f"ERROR: {key} is not a float.")
     if spec[key] <= x:
         sys.exit(f"ERROR: {key} should be strictly larger than {x}.")
     spec[key] = float(spec[key])
+
 
 # Require value to be a list of integers larger than or equal to x
 def require_list_of_int_leq(spec, key, x):
@@ -131,9 +144,11 @@ def require_list_of_int_leq(spec, key, x):
         if not is_int(n):
             sys.exit(f"ERROR: {key} has non-integer values.")
         if n < x:
-            sys.exit(f"ERROR: {key} should have all values "
-                     f"larger than or equal to {x}.")
+            sys.exit(
+                f"ERROR: {key} should have all values " f"larger than or equal to {x}."
+            )
         spec[key][i] = int(spec[key][i])
+
 
 # Require value to be a list of floats between 0 and 1, inclusive
 def require_list_of_probability(spec, key):
@@ -143,9 +158,11 @@ def require_list_of_probability(spec, key):
         if not is_float(n):
             sys.exit(f"ERROR: {key} has non-float values.")
         if n < 0 or n > 1:
-            sys.exit(f"ERROR: {key} should have all values "
-                     f"between 0 and 1, inclusive.")
+            sys.exit(
+                f"ERROR: {key} should have all values " f"between 0 and 1, inclusive."
+            )
         spec[key][i] = float(spec[key][i])
+
 
 # Require value to be a list of strings with finite allowed values
 def require_list_of_enum(spec, key, values):

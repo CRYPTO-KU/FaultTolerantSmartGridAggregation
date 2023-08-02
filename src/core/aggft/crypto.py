@@ -21,8 +21,10 @@ PRFKey = bytes
 # PRF Functions
 ################################################################################
 
+
 def generate_prf_key(length: int) -> PRFKey:
     return secrets.token_bytes(length)
+
 
 # Use AES with CTR mode as a PRF
 def prf(key: PRFKey, input: int) -> int:
@@ -44,8 +46,10 @@ HomomorphicNumber = EncryptedNumber
 ################################################################################
 
 
-def generate_homomorphic_keypair(length: int) -> Tuple[HomomorphicPrivateKey, HomomorphicPublicKey]:
-    pk, sk = generate_paillier_keypair(n_length = length)
+def generate_homomorphic_keypair(
+    length: int,
+) -> Tuple[HomomorphicPrivateKey, HomomorphicPublicKey]:
+    pk, sk = generate_paillier_keypair(n_length=length)
     return sk, pk
 
 
