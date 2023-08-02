@@ -1,5 +1,5 @@
 {
-  description = "Simple Flake Template";
+  description = "AggFT Implementation";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
