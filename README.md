@@ -152,3 +152,13 @@ specification in a JSON file and provide the following fields:
   time will terminate. The time will be computed as `phase-1-len-constant * n`.
   Times less than 1 second will be counted as 1 second.
 - Example: `"phase-1-len-constant": 0.005`.
+
+## TODOs
+
+- Support simulations with all link combinations.
+- Support simulations with handcrafted link status (figure 3 from the paper).
+- Support parallel simulations for all simulation types.
+- Add simulations with standard cryptographic key lengths (now we use short
+  keys).
+- Document the simulation output fields.
+- Benchmark basic computational operations (formulas in paper).
