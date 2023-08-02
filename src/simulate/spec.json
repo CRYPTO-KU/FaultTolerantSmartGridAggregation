@@ -1,0 +1,19 @@
+{
+	"simulations-per-config": 1,
+	"random-seed": 0,
+	"sm-counts": [50, 100, 200, 400],
+	"n-min-constants": [0.5],
+	"dc-link-failure-probabilities": [0, 0.3, 0.7],
+	"dc-link-failure-exact": false,
+	"sm-link-failure-probabilities": [0, 0.3, 0.7],
+	"sm-link-failure-exact": false,
+	"sm-full-failure-probabilities": [0, 0.3, 0.7],
+	"sm-full-failure-exact": false,
+	"privacy-types": ["mask", "encr"],
+	"masking-modulus": 2e20,
+	"prf-key-len": 32,
+	"homomorphic-key-len": 256,
+	"startup-wait": 0.1,
+	"round-len-constant": 0.1,
+	"phase-1-len-constant": 0.005
+}
