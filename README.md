@@ -162,3 +162,4 @@ specification in a JSON file and provide the following fields:
   keys).
 - Document the simulation output fields.
 - Benchmark basic computational operations (formulas in paper).
+- Split documentation into multiple files (in the `docs` directory).
