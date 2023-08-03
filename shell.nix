@@ -3,6 +3,9 @@
 {pkgs ? (import ./nixpkgs.nix) {}}: {
   default = pkgs.mkShell {
     nativeBuildInputs = with pkgs; [
+      # Command runner
+      just
+
       # Python Environment
       (python310.withPackages (ps:
         with ps; [
