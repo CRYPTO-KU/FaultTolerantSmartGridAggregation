@@ -158,6 +158,7 @@ specification in a JSON file and provide the following fields:
 - Support simulations with all link combinations.
 - Support simulations with handcrafted link status (figure 3 from the paper).
 - Support parallel simulations for all simulation types.
+- Support simulations with exact failure probability combinations.
 - Add simulations with standard cryptographic key lengths (now we use short
   keys).
 - Document the simulation output fields.
