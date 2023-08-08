@@ -117,6 +117,3 @@ def simulate(spec):
                 dc_report,
                 sm_reports,
             )
-
-
-main()
