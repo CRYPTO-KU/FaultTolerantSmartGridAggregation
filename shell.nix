@@ -6,6 +6,9 @@
       # Command runner
       just
 
+      # Python Formatter
+      black
+
       # Python Environment
       (python310.withPackages (ps:
         with ps; [
@@ -17,20 +20,8 @@
           aggft-core
         ]))
 
-      # Python Formatter
-      black
-
       # custom package
       aggft-simulate
-
-      # Ruby Environment
-      (ruby.withPackages (ps:
-        with ps; [
-          optimist
-        ]))
-
-      # Ruby Formatter
-      rufo
     ];
   };
 }

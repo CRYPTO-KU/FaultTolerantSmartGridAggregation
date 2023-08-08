@@ -6,4 +6,3 @@ format-code:
   cd {{justfile_directory()}}
   nix fmt
   black .
-  rufo .
