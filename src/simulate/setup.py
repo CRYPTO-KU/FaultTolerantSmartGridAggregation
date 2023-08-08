@@ -7,10 +7,10 @@ setup(
     version="0.1.0",
     description="Run simulations using the AggFT implementation.",
     author="Ameer Taweel",
-    py_modules=["simulate-some"],
+    packages=["simulate"],
     entry_points={
         "console_scripts": [
-            "aggft-simulate-some=simulate_some:main",
+            "aggft-sim=simulate.sim_some_parallel:main",
         ],
     },
 )

@@ -4,10 +4,10 @@ from itertools import product
 
 import aggft
 
-from report import report
-from validate import validate_spec
-from simulate_one import simulate_one_mask, simulate_one_homomorphic
-from utils import generate_link_status, generate_sm_status
+from .report import report
+from .validate import validate_spec
+from .sim_one import simulate_one_mask, simulate_one_homomorphic
+from .utils import generate_link_status, generate_sm_status
 
 
 def main():

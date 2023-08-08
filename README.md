@@ -8,7 +8,7 @@ simulations.
 
 ## Simulations
 
-### Simulation Spec Generation
+### Simulation Spec
 
 First, we need to write a spec that describes our simulations. Write your
 specification in a JSON file and provide the following fields:
@@ -20,6 +20,14 @@ specification in a JSON file and provide the following fields:
 - Description: Specifies the number of simulation files to generate per
   configuration.
 - Example: `"simulations-per-config": 5`.
+
+### `processes`
+
+- Required.
+- Type: Integer larger than or equal to 1.
+- Description: Specifies the number of processes to use to run the simulations.
+  Each process will run the full `simulations-per-config`.
+- Example: `"processes": 12`.
 
 ### `random-seed`
 
@@ -157,7 +165,6 @@ specification in a JSON file and provide the following fields:
 
 - Support simulations with all link combinations.
 - Support simulations with handcrafted link status (figure 3 from the paper).
-- Support parallel simulations for all simulation types.
 - Support simulations with exact failure probability combinations.
 - Add simulations with standard cryptographic key lengths (now we use short
   keys).

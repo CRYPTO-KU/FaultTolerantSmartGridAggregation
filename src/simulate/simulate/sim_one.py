@@ -4,7 +4,7 @@ from time import time as now
 
 import aggft
 
-import utils
+from . import utils
 
 ################################################################################
 # Simulation Logic

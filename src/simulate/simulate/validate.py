@@ -6,6 +6,10 @@ def validate_spec(spec):
     require(spec, key)
     require_int_leq(spec, key, 1)
 
+    key = "processes"
+    require(spec, key)
+    require_int_leq(spec, key, 1)
+
     key = "random-seed"
     require(spec, key)
     require_int_leq(spec, key, 0)
