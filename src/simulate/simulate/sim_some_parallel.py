@@ -20,7 +20,7 @@ def run(spec):
   proc_count = spec["processes"]
 
   sm_stats_headers = stats_headers(
-    ["WORKING_SM", "PHASE_1_SM", "PHASE_2_SM", "ACTIVE_SM"],
+    ["WORKING_SM", "PHASE_1_SM", "PHASE_2_SM"],
     [
       "TOTAL_TIME",
       "NET_SND_SUCC_COUNT",

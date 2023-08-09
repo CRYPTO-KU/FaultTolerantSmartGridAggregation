@@ -65,11 +65,8 @@ def report(
     working_reports = [i for i in sm_reports if i]
     phase_1_reports = [i for i in sm_reports if i and i.id in phase_1_sms]
     phase_2_reports = [i for i in sm_reports if i and i.id in phase_2_sms]
-    active_reports = [
-        i for i in sm_reports if i and (i.id in phase_1_sms or i.id in phase_2_sms)
-    ]
     sm_stats = stats(
-        [working_reports, phase_1_reports, phase_2_reports, active_reports],
+        [working_reports, phase_1_reports, phase_2_reports],
         [
             lambda i: i.t_end - i.t_start,
             lambda i: i.net_snd_succ,
