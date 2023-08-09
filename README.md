@@ -7,7 +7,6 @@
 - Support simulations with exact failure probability combinations.
 - Add simulations with standard cryptographic key lengths (now we use short
   keys).
-- Document the simulation output fields.
 - Add installation section to the README.
 - Benchmark basic computational operations (formulas in paper).
 
@@ -19,13 +18,16 @@ simulations.
 
 ### Simulations
 
-There are three steps to run a simulation:
+There are four steps to run a simulation:
 
 1. Decide simulation type (TODO: Mention types).
 2. Write simulation spec.
 3. Run simulation.
+4. Analyze results.
 
-Documentation for the spec files is available at [docs/spec](docs/spec).
+Documentation for the spec files is available at [docs/spec](docs/spec). And
+documentation for the result files is available at
+[docs/csv-head](docs/csv-head).
 
 #### Simulations Determinism
 
