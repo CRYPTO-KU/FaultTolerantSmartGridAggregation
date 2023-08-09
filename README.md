@@ -8,6 +8,7 @@
 - Add simulations with standard cryptographic key lengths (now we use short
   keys).
 - Document the simulation output fields.
+- Add installation section to the README.
 - Benchmark basic computational operations (formulas in paper).
 
 ## Usage
