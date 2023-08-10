@@ -55,16 +55,27 @@ def simulate(spec):
     sm_link_fail_exact = spec["sm-link-failure-exact"]
     sm_full_fail_exact = spec["sm-full-failure-exact"]
 
+    if spec["zip-failure-probabilities"]:
+        all_failure_probs = list(zip(
+            spec["dc-link-failure-probabilities"],
+            spec["sm-link-failure-probabilities"],
+            spec["sm-full-failure-probabilities"]
+        ))
+    else:
+        all_failure_probs = list(product(
+            spec["dc-link-failure-probabilities"],
+            spec["sm-link-failure-probabilities"],
+            spec["sm-full-failure-probabilities"]
+        ))
+
     configs = product(
         spec["sm-counts"],
         spec["n-min-constants"],
-        spec["dc-link-failure-probabilities"],
-        spec["sm-link-failure-probabilities"],
-        spec["sm-full-failure-probabilities"],
+        all_failure_probs,
         spec["privacy-types"],
     )
 
-    for n, n_min_const, *failure_probs, privacy_type in configs:
+    for n, n_min_const, failure_probs, privacy_type in configs:
         n_min = int(max(2, n_min_const * n))
         dc_link_fail_p, sm_link_fail_p, sm_full_fail_p = failure_probs
         round_len = max(2.0, round_len_constant * n)

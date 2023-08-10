@@ -22,6 +22,10 @@ def validate_spec(spec):
     require(spec, key)
     require_list_of_probability(spec, key)
 
+    key = "zip-failure-probabilities"
+    require(spec, key)
+    require_bool(spec, key)
+
     key = "dc-link-failure-probabilities"
     require(spec, key)
     require_list_of_probability(spec, key)

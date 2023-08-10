@@ -4,7 +4,6 @@
 
 - Support simulations with all link combinations.
 - Support simulations with handcrafted link status (figure 3 from the paper).
-- Support simulations with exact failure probability combinations.
 - Add simulations with standard cryptographic key lengths (now we use short
   keys).
 - Add installation section to the README.

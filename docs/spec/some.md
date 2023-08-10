@@ -45,6 +45,19 @@ the possible fields in the spec file.
 - Description: `n-min` will be computed by `int(max(2, n-min-constant * n))`.
 - Example: `"n-min-constants": [0.25, 0.5, 0.75]`.
 
+## `zip-failure-probabilities`
+
+- Required.
+- Type: Boolean.
+- Description: Whether or not to zip failure probabilities. For example, assume
+  DC link failure probabilities are `[0.1, 0.2]`, SM link failure probabilities
+  are `[0.3, 0.4]`, and SM full failure probabilities are `[0.5, 0.6]`. When
+  `zip-failure-probabilities` is `true`, we will have the following failure
+  probabilities: `[(0.1, 0.3, 0.5), (0.2, 0.4, 0.6)]`. Otherwise, we will have
+  `[(0.1, 0.3, 0.5), (0.1, 0.3, 0.6), (0.1, 0.4, 0.5), (0.1, 0.4, 0.6),
+  (0.2, 0.3, 0.5), (0.2, 0.3, 0.6), (0.2, 0.4, 0.5), (0.2, 0.4, 0.6)]`.
+- Example: `"zip-failure-probabilities": true`.
+
 ## `dc-link-failure-probabilities`
 
 - Required.
