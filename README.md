@@ -4,9 +4,9 @@
 
 - Support simulations with all link combinations.
 - Support simulations with handcrafted link status (figure 3 from the paper).
-- Add simulations with standard cryptographic key lengths (now we use short
-  keys).
 - Add installation section to the README.
+- Run simulations with standard cryptographic key lengths (now we use short
+  keys).
 - Benchmark basic computational operations (formulas in paper).
 
 ## Usage
