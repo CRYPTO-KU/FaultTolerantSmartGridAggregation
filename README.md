@@ -2,7 +2,6 @@
 
 ## TODOs
 
-- Support simulations with all link combinations.
 - Support simulations with handcrafted link status (figure 3 from the paper).
 - Add installation section to the README.
 - Run simulations with standard cryptographic key lengths (now we use short
@@ -17,16 +16,15 @@ simulations.
 
 ### Simulations
 
-There are four steps to run a simulation:
+There are three steps to run a simulation:
 
-1. Decide simulation type (TODO: Mention types).
-2. Write simulation spec.
-3. Run simulation.
-4. Analyze results.
+1. Write simulation spec.
+2. Run simulation.
+3. Analyze results.
 
-Documentation for the spec files is available at [docs/spec](docs/spec). And
-documentation for the result files is available at
-[docs/csv-head](docs/csv-head).
+Documentation for the spec format is available at [docs/spec.md](docs/spec.md).
+And documentation for the output format is available at
+[docs/output.md](docs/output.md).
 
 #### Simulations Determinism
 

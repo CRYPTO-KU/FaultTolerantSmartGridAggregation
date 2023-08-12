@@ -10,7 +10,7 @@ setup(
     packages=["simulate"],
     entry_points={
         "console_scripts": [
-            "aggft-sim=simulate.sim_some_parallel:main",
+            "aggft-sim=simulate.sim_parallel:main",
         ],
     },
 )

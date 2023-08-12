@@ -1,4 +1,4 @@
-# `aggft-sim-some` Spec Format
+# `aggft-sim` Spec Format
 
 The simulation spec should be in the JSON format. This document describes all
 the possible fields in the spec file.
@@ -45,9 +45,19 @@ the possible fields in the spec file.
 - Description: `n-min` will be computed by `int(max(2, n-min-constant * n))`.
 - Example: `"n-min-constants": [0.25, 0.5, 0.75]`.
 
-## `zip-failure-probabilities`
+## `all-failure-possibilities`
 
 - Required.
+- Type: Boolean.
+- Description: When `true`, will simulate all combinations of link failures.
+  Otherwise, will simulate a subset of those combinations based on the failure
+  probabilities provided in other fields. Don't set to `ture` for large numbers
+  of smart meters, because the number of combinations blows up.
+- Example: `"all-failure-possibilities": false`.
+
+## `zip-failure-probabilities`
+
+- Required if `all-failure-possibilities` is `false`.
 - Type: Boolean.
 - Description: Whether or not to zip failure probabilities. For example, assume
   DC link failure probabilities are `[0.1, 0.2]`, SM link failure probabilities
@@ -60,7 +70,7 @@ the possible fields in the spec file.
 
 ## `dc-link-failure-probabilities`
 
-- Required.
+- Required if `all-failure-possibilities` is `false`.
 - Type: A list of probabilities (floats between `0` and `1`, inclusive).
 - Description: Specifies the failure probability for links between a DC and an
   SM.
@@ -68,7 +78,7 @@ the possible fields in the spec file.
 
 ## `dc-link-failure-exact`
 
-- Required.
+- Required if `all-failure-possibilities` is `false`.
 - Type: Boolean.
 - Description: Whether or not to force exact failure probability. Setting this
   to `true` will force the failed links to be exactly equal to the float in
@@ -78,7 +88,7 @@ the possible fields in the spec file.
 
 ## `sm-link-failure-probabilities`
 
-- Required.
+- Required if `all-failure-possibilities` is `false`.
 - Type: A list of probabilities (floats between `0` and `1`, inclusive).
 - Description: Specifies the failure probability for links between an SM and
   another SM.
@@ -86,7 +96,7 @@ the possible fields in the spec file.
 
 ## `sm-link-failure-exact`
 
-- Required.
+- Required if `all-failure-possibilities` is `false`.
 - Type: Boolean.
 - Description: Whether or not to force exact failure probability. Setting this
   to `true` will force the failed links to be exactly equal to the float in
@@ -96,14 +106,14 @@ the possible fields in the spec file.
 
 ## `sm-full-failure-probabilities`
 
-- Required.
+- Required if `all-failure-possibilities` is `false`.
 - Type: A list of probabilities (floats between `0` and `1`, inclusive).
 - Description: Specifies the failure probability for smart meters.
 - Example: `"sm-full-failure-probabilities": [0, 0.1, 0.2, 0.4]`.
 
 ## `sm-full-failure-exact`
 
-- Required.
+- Required if `all-failure-possibilities` is `false`.
 - Type: Boolean.
 - Description: Whether or not to force exact failure probability. Setting this
   to `true` will force the failed SMs to be exactly equal to the float in

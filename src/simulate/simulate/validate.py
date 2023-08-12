@@ -22,33 +22,38 @@ def validate_spec(spec):
     require(spec, key)
     require_list_of_probability(spec, key)
 
-    key = "zip-failure-probabilities"
+    key = "all-failure-possibilities"
     require(spec, key)
     require_bool(spec, key)
 
-    key = "dc-link-failure-probabilities"
-    require(spec, key)
-    require_list_of_probability(spec, key)
+    if not spec[key]:
+        key = "zip-failure-probabilities"
+        require(spec, key)
+        require_bool(spec, key)
 
-    key = "dc-link-failure-exact"
-    require(spec, key)
-    require_bool(spec, key)
+        key = "dc-link-failure-probabilities"
+        require(spec, key)
+        require_list_of_probability(spec, key)
 
-    key = "sm-link-failure-probabilities"
-    require(spec, key)
-    require_list_of_probability(spec, key)
+        key = "dc-link-failure-exact"
+        require(spec, key)
+        require_bool(spec, key)
 
-    key = "sm-link-failure-exact"
-    require(spec, key)
-    require_bool(spec, key)
+        key = "sm-link-failure-probabilities"
+        require(spec, key)
+        require_list_of_probability(spec, key)
 
-    key = "sm-full-failure-probabilities"
-    require(spec, key)
-    require_list_of_probability(spec, key)
+        key = "sm-link-failure-exact"
+        require(spec, key)
+        require_bool(spec, key)
 
-    key = "sm-full-failure-exact"
-    require(spec, key)
-    require_bool(spec, key)
+        key = "sm-full-failure-probabilities"
+        require(spec, key)
+        require_list_of_probability(spec, key)
+
+        key = "sm-full-failure-exact"
+        require(spec, key)
+        require_bool(spec, key)
 
     key = "privacy-types"
     require(spec, key)

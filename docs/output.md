@@ -1,4 +1,4 @@
-# CSV Header Documentation
+# `aggft-sim` Ouput Format
 
 - `N`: Number of smart meters.
 - `N_MIN_CONST`: `N_MIN` Constant.

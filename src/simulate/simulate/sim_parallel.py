@@ -4,13 +4,13 @@ import sys
 
 from multiprocessing import Process
 
-from . import sim_some
+from . import sim
 
 def main():
-  args = sim_some.parse_args()
-  spec = sim_some.get_spec(args)
+  args = sim.parse_args()
+  spec = sim.get_spec(args)
 
-  sim_some.validate_spec(spec)
+  sim.validate_spec(spec)
 
   random.seed(spec["random-seed"])
 
@@ -71,7 +71,7 @@ def run(spec):
     sep=","
   )
 
-  procs = [Process(target=sim_some.simulate, args=(spec,)) for _ in range(proc_count)]
+  procs = [Process(target=sim.simulate, args=(spec,)) for _ in range(proc_count)]
 
   for p in procs:
       p.start()

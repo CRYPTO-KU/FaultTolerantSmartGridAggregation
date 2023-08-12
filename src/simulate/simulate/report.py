@@ -114,8 +114,8 @@ def report(
         int(sm_full_fail_e),
         terminated,
         success,
-        dc_time,
-        dc_time_p_1,
+        f"{dc_time:.2f}",
+        f"{dc_time_p_1:.2f}",
         phase_1_cnt,
         phase_2_cnt,
         len(broken_sms),
@@ -157,9 +157,9 @@ def stats(lists, funcs):
     for lst in lists:
         for f in funcs:
             lst_f = [f(i) for i in lst]
-            res.append(max(lst_f) if len(lst_f) > 0 else "N/A")
-            res.append(min(lst_f) if len(lst_f) > 0 else "N/A")
-            res.append(avg(lst_f) if len(lst_f) > 0 else "N/A")
-            res.append(std(lst_f) if len(lst_f) > 0 else "N/A")
+            res.append(f"{max(lst_f):.2f}" if len(lst_f) > 0 else "N/A")
+            res.append(f"{min(lst_f):.2f}" if len(lst_f) > 0 else "N/A")
+            res.append(f"{avg(lst_f):.2f}" if len(lst_f) > 0 else "N/A")
+            res.append(f"{std(lst_f):.2f}" if len(lst_f) > 0 else "N/A")
 
     return res
