@@ -1,5 +1,6 @@
 import threading
 
+from collections import defaultdict
 from time import time as now
 
 import aggft
@@ -21,6 +22,7 @@ def simulate_one_mask(
     phase_1_len,
     prf_key_len,
     masking_modulus,
+    link_valid=defaultdict(lambda: True),
 ):
     prf_keys = [aggft.crypto.generate_prf_key(prf_key_len) for _ in range(n)]
 
@@ -33,7 +35,7 @@ def simulate_one_mask(
     )
 
     return simulate_one(
-        n, link_status, sm_status, startup_wait, base_dc_meta, base_sm_meta
+        n, link_status, sm_status, startup_wait, base_dc_meta, base_sm_meta, link_valid
     )
 
 
@@ -46,6 +48,7 @@ def simulate_one_homomorphic(
     round_len,
     phase_1_len,
     homomorphic_key_len,
+    link_valid=defaultdict(lambda: True),
 ):
     sk, pk = aggft.crypto.generate_homomorphic_keypair(homomorphic_key_len)
 
@@ -54,11 +57,13 @@ def simulate_one_homomorphic(
     base_sm_meta = utils.base_sm_homomorphic_meta(n_min, round_len, phase_1_len, pk)
 
     return simulate_one(
-        n, link_status, sm_status, startup_wait, base_dc_meta, base_sm_meta
+        n, link_status, sm_status, startup_wait, base_dc_meta, base_sm_meta, link_valid
     )
 
 
-def simulate_one(n, link_status, sm_status, startup_wait, base_dc_meta, base_sm_meta):
+def simulate_one(
+    n, link_status, sm_status, startup_wait, base_dc_meta, base_sm_meta, link_valid
+):
     registry = utils.make_registry(n)
 
     test_start = now()
@@ -71,6 +76,7 @@ def simulate_one(n, link_status, sm_status, startup_wait, base_dc_meta, base_sm_
         utils.make_net_mngr(-1, registry, link_status, sm_status),
         link_status,
         sm_status,
+        link_valid,
     )
     dc_thread = threading.Thread(target=dc.run_once)
 
@@ -90,6 +96,7 @@ def simulate_one(n, link_status, sm_status, startup_wait, base_dc_meta, base_sm_
             utils.make_net_mngr(id, registry, link_status, sm_status),
             link_status,
             sm_status,
+            link_valid,
         )
         sm_thread = threading.Thread(target=sm.run_once)
         sm_threads.append(sm_thread)

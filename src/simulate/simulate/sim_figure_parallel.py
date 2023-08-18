@@ -4,7 +4,7 @@ import sys
 
 from multiprocessing import Process
 
-from . import sim
+from . import sim_figure as sim
 
 
 def main():

@@ -51,13 +51,18 @@ def simulate(spec):
     round_len_constant = spec["round-len-constant"]
     phase_1_len_constant = spec["phase-1-len-constant"]
 
-    zip_failure_probs = spec["zip-failure-probabilities"]
-    dc_link_fail_probs = spec["dc-link-failure-probabilities"]
-    sm_link_fail_probs = spec["sm-link-failure-probabilities"]
-    sm_full_fail_probs = spec["sm-full-failure-probabilities"]
-    dc_link_fail_exact = spec["dc-link-failure-exact"]
-    sm_link_fail_exact = spec["sm-link-failure-exact"]
-    sm_full_fail_exact = spec["sm-full-failure-exact"]
+    if spec["all-failure-possibilities"]:
+        dc_link_fail_exact = "N/A"
+        sm_link_fail_exact = "N/A"
+        sm_full_fail_exact = "N/A"
+    else:
+        zip_failure_probs = spec["zip-failure-probabilities"]
+        dc_link_fail_probs = spec["dc-link-failure-probabilities"]
+        sm_link_fail_probs = spec["sm-link-failure-probabilities"]
+        sm_full_fail_probs = spec["sm-full-failure-probabilities"]
+        dc_link_fail_exact = spec["dc-link-failure-exact"]
+        sm_link_fail_exact = spec["sm-link-failure-exact"]
+        sm_full_fail_exact = spec["sm-full-failure-exact"]
 
     props = product(
         spec["sm-counts"],
@@ -77,14 +82,13 @@ def simulate(spec):
                 sm_full_fail_probs,
                 dc_link_fail_exact,
                 sm_link_fail_exact,
-                sm_full_fail_exact
+                sm_full_fail_exact,
             )
         for link_status, sm_status, *failure_probs in configs:
             n_min = int(max(2, n_min_const * n))
             dc_link_fail_p, sm_link_fail_p, sm_full_fail_p = failure_probs
             round_len = max(2.0, round_len_constant * n)
             phase_1_len = max(1.0, phase_1_len_constant * n)
-            dc_link_fail_p, sm_link_fail_p, sm_full_fail_p = failure_probs
 
             for _ in range(spec["simulations-per-config"]):
                 if privacy_type == "mask":
@@ -128,6 +132,7 @@ def simulate(spec):
                     sm_reports,
                 )
 
+
 def some_configurations(
     n,
     zip_failure_probs,
@@ -136,20 +141,16 @@ def some_configurations(
     sm_full_fail_probs,
     dc_link_fail_exact,
     sm_link_fail_exact,
-    sm_full_fail_exact
+    sm_full_fail_exact,
 ):
     if zip_failure_probs:
-        all_failure_probs = list(zip(
-            dc_link_fail_probs,
-            sm_link_fail_probs,
-            sm_full_fail_probs
-        ))
+        all_failure_probs = list(
+            zip(dc_link_fail_probs, sm_link_fail_probs, sm_full_fail_probs)
+        )
     else:
-        all_failure_probs = list(product(
-            dc_link_fail_probs,
-            sm_link_fail_probs,
-            sm_full_fail_probs
-        ))
+        all_failure_probs = list(
+            product(dc_link_fail_probs, sm_link_fail_probs, sm_full_fail_probs)
+        )
 
     for dc_link_fail_p, sm_link_fail_p, sm_full_fail_p in all_failure_probs:
         link_status = generate_link_status(
@@ -157,6 +158,7 @@ def some_configurations(
         )
         sm_status = generate_sm_status(n, sm_full_fail_p, sm_full_fail_exact)
         yield link_status, sm_status, dc_link_fail_p, sm_link_fail_p, sm_full_fail_p
+
 
 def all_configurations(n):
     sm_status = [True] * n

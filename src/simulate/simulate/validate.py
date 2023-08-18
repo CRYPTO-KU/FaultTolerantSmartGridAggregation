@@ -90,6 +90,58 @@ def validate_spec(spec):
         sys.exit(f"ERROR: {key} should be strictly less than {cmp}.")
 
 
+def validate_fig_spec(spec):
+    key = "simulations-per-config"
+    require(spec, key)
+    require_int_leq(spec, key, 1)
+
+    key = "processes"
+    require(spec, key)
+    require_int_leq(spec, key, 1)
+
+    key = "random-seed"
+    require(spec, key)
+    require_int_leq(spec, key, 0)
+
+    key = "n-min"
+    require(spec, key)
+    require_int_range(spec, key, 2, 4)
+
+    key = "privacy-types"
+    require(spec, key)
+    require_list_of_enum(spec, key, ["mask", "encr"])
+
+    key = "masking-modulus"
+    if "mask" in spec["privacy-types"]:
+        require(spec, key)
+        require_int_leq(spec, key, 2)
+
+    key = "prf-key-len"
+    if "mask" in spec["privacy-types"]:
+        require(spec, key)
+        require_int_leq(spec, key, 1)
+
+    key = "homomorphic-key-len"
+    if "encr" in spec["privacy-types"]:
+        require(spec, key)
+        require_int_leq(spec, key, 1)
+
+    key = "startup-wait"
+    require(spec, key)
+    require_float_l(spec, key, 0)
+
+    key = "round-len"
+    require(spec, key)
+    require_float_leq(spec, key, 2)
+
+    cmp = key
+    key = "phase-1-len"
+    require(spec, key)
+    require_float_leq(spec, key, 1)
+    if spec[key] >= spec[cmp]:
+        sys.exit(f"ERROR: {key} should be strictly less than {cmp}.")
+
+
 ################################################################################
 # Primitive Type Helpers
 ################################################################################
@@ -141,11 +193,28 @@ def require_int_leq(spec, key, x):
     spec[key] = int(spec[key])
 
 
+# Require value to be an integer in the range [x, y]
+def require_int_range(spec, key, x, y):
+    if not is_int(spec[key]):
+        sys.exit(f"ERROR: {key} is not an integer.")
+    if spec[key] < x or spec[key] > y:
+        sys.exit(f"ERROR: {key} should be in [{x}, {y}].")
+    spec[key] = int(spec[key])
+
+
 def require_float_l(spec, key, x):
     if not is_float(spec[key]):
         sys.exit(f"ERROR: {key} is not a float.")
     if spec[key] <= x:
         sys.exit(f"ERROR: {key} should be strictly larger than {x}.")
+    spec[key] = float(spec[key])
+
+
+def require_float_leq(spec, key, x):
+    if not is_float(spec[key]):
+        sys.exit(f"ERROR: {key} is not a float.")
+    if spec[key] < x:
+        sys.exit(f"ERROR: {key} should be larger or equal to {x}.")
     spec[key] = float(spec[key])
 
 

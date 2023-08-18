@@ -2,7 +2,6 @@
 
 ## TODOs
 
-- Support simulations with handcrafted link status (figure 3 from the paper).
 - Add installation section to the README.
 - Run simulations with standard cryptographic key lengths (now we use short
   keys).
@@ -16,7 +15,7 @@ simulations.
 
 ### Simulations
 
-There are three steps to run a simulation:
+There are three steps to run a simulation with `aggft-sim`:
 
 1. Write simulation spec.
 2. Run simulation.
@@ -25,6 +24,11 @@ There are three steps to run a simulation:
 Documentation for the spec format is available at [docs/spec.md](docs/spec.md).
 And documentation for the output format is available at
 [docs/output.md](docs/output.md).
+
+There is a special simulation command to run simulations based on the topology
+of `Figure 1` in the paper. The command is `aggft-sim-fig`. Documentation for
+its spec format is available at [docs/fig-spec.md](docs/fig-spec.md). It has the
+same output format as `aggft-sim`.
 
 #### Simulations Determinism
 

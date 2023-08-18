@@ -109,9 +109,9 @@ def report(
         dc_link_fail_p,
         sm_link_fail_p,
         sm_full_fail_p,
-        int(dc_link_fail_e),
-        int(sm_link_fail_e),
-        int(sm_full_fail_e),
+        int(dc_link_fail_e) if dc_link_fail_e != "N/A" else "N/A",
+        int(sm_link_fail_e) if sm_link_fail_e != "N/A" else "N/A",
+        int(sm_full_fail_e) if sm_full_fail_e != "N/A" else "N/A",
         terminated,
         success,
         f"{dc_time:.2f}",
@@ -136,7 +136,7 @@ def report(
         sm_with_max_snd_fails_rcv_size,
         *sm_stats,
         issues,
-        sep=","
+        sep=",",
     )
 
 

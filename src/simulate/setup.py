@@ -11,6 +11,7 @@ setup(
     entry_points={
         "console_scripts": [
             "aggft-sim=simulate.sim_parallel:main",
+            "aggft-sim-fig=simulate.sim_figure_parallel:main",
         ],
     },
 )

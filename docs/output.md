@@ -1,4 +1,4 @@
-# `aggft-sim` Ouput Format
+# `aggft-sim` and `aggft-sim-fig` Ouput Format
 
 - `N`: Number of smart meters.
 - `N_MIN_CONST`: `N_MIN` Constant.

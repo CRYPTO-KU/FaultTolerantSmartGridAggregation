@@ -166,10 +166,11 @@ def dc_factory(
     net_mngr: network.NetworkManager,
     link_status: Dict[Tuple[int, int], bool],
     sm_status: List[bool],
+    link_valid,
 ) -> dc.DC:
-    dc_addr = network.Address("localhost", -1, True)
+    dc_addr = network.Address("localhost", -1, link_valid[(-1, -1)])
 
-    sm_addr = tuple([network.Address("localhost", i, True) for i in range(n)])
+    sm_addr = tuple([network.Address("localhost", i, link_valid[(-1, i)]) for i in range(n)])
 
     meta = replace(
         base_meta,
@@ -190,10 +191,11 @@ def sm_factory(
     net_mngr: network.NetworkManager,
     link_status: Dict[Tuple[int, int], bool],
     sm_status: List[bool],
+    link_valid,
 ) -> sm.SM:
-    dc_addr = network.Address("localhost", -1, True)
+    dc_addr = network.Address("localhost", -1, link_valid[(id, -1)])
 
-    sm_addr = tuple([network.Address("localhost", i, True) for i in range(n)])
+    sm_addr = tuple([network.Address("localhost", i, link_valid[(id, i)]) for i in range(n)])
 
     meta = replace(
         base_meta,
