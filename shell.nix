@@ -6,6 +6,9 @@
       # Command runner
       just
 
+      # compression programs
+      p7zip
+
       # Python Formatter
       black
 

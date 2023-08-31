@@ -3,6 +3,7 @@
 ## TODOs
 
 - Add installation section to the README.
+- Add compression/decompression section to README.
 - Run simulations with standard cryptographic key lengths (now we use short
   keys).
 - Benchmark basic computational operations (formulas in paper).
