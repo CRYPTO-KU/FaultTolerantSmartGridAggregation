@@ -1,0 +1,13 @@
+{
+	"simulations-per-config": 42,
+	"processes": 24,
+	"random-seed": 0,
+	"n-min": 2,
+	"privacy-types": ["mask", "encr"],
+	"masking-modulus": 2e20,
+	"prf-key-len": 32,
+	"homomorphic-key-len": 256,
+	"startup-wait": 0.1,
+	"round-len": 2,
+	"phase-1-len": 1
+}
