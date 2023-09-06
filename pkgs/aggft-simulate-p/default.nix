@@ -1,13 +1,22 @@
 {
   writeShellScriptBin,
   jq,
-  moreutils,
+  parallel,
   aggft-simulate,
 }:
 writeShellScriptBin "aggft-sim-p" ''
+  cleanup() {
+      rv=$?
+      rm -rf "$TMPDIR"
+      exit $rv
+  }
+
+  TMPDIR="$(mktemp -d)"
+  trap "cleanup" EXIT
+
   ${aggft-simulate}/bin/aggft-headers
 
   PROCS=$(cat $1 | ${jq}/bin/jq ".processes")
-  ARGS=$(for i in `seq $PROCS`; do echo -n "$1 "; done)
-  ${moreutils}/bin/parallel ${aggft-simulate}/bin/aggft-sim -- $ARGS
+
+  yes $1 | head -n $PROCS | PARALLEL_HOME=$TMPDIR ${parallel}/bin/parallel --will-cite ${aggft-simulate}/bin/aggft-sim {}
 ''
