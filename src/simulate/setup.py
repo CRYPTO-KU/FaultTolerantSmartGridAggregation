@@ -10,8 +10,9 @@ setup(
     packages=["simulate"],
     entry_points={
         "console_scripts": [
-            "aggft-sim=simulate.sim_parallel:main",
-            "aggft-sim-fig=simulate.sim_figure_parallel:main",
+            "aggft-sim=simulate.sim:main",
+            "aggft-sim-fig=simulate.sim_figure:main",
+            "aggft-headers=simulate.print_csv_headers:main",
         ],
     },
 )

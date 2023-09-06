@@ -6,4 +6,7 @@
   aggft-simulate = pkgs.callPackage ./aggft-simulate {
     inherit (pkgs.python3.pkgs) buildPythonApplication aggft-core;
   };
+
+  aggft-simulate-p = pkgs.callPackage ./aggft-simulate-p {};
+  aggft-simulate-fig-p = pkgs.callPackage ./aggft-simulate-p/fig.nix {};
 }

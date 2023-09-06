@@ -1,26 +1,4 @@
-import random
-import signal
-import sys
-
-from multiprocessing import Process
-
-from . import sim
-
-
 def main():
-    args = sim.parse_args()
-    spec = sim.get_spec(args)
-
-    sim.validate_spec(spec)
-
-    random.seed(spec["random-seed"])
-
-    run(spec)
-
-
-def run(spec):
-    proc_count = spec["processes"]
-
     sm_stats_headers = stats_headers(
         ["WORKING_SM", "PHASE_1_SM", "PHASE_2_SM"],
         [
@@ -72,14 +50,6 @@ def run(spec):
         "ISSUES",
         sep=",",
     )
-
-    procs = [Process(target=sim.simulate, args=(spec,)) for _ in range(proc_count)]
-
-    for p in procs:
-        p.start()
-
-    for p in procs:
-        p.join()
 
 
 def stats_headers(lists, funcs):

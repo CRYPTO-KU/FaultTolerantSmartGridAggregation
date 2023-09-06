@@ -23,8 +23,10 @@
           aggft-core
         ]))
 
-      # custom package
+      # custom packages
       aggft-simulate
+      aggft-simulate-p
+      aggft-simulate-fig-p
     ];
   };
 }

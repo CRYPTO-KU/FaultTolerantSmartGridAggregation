@@ -2,8 +2,6 @@ import argparse, json, random
 
 from itertools import product
 
-import aggft
-
 from .report import report
 from .validate import validate_spec
 from .sim_one import simulate_one_mask, simulate_one_homomorphic
