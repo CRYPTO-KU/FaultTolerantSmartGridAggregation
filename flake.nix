@@ -3,13 +3,11 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs = {
     self,
     nixpkgs,
-    flake-utils,
   }: let
     inherit (self) outputs;
     forAllSystems = nixpkgs.lib.genAttrs [
