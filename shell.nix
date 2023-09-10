@@ -28,5 +28,6 @@
       aggft-simulate-p
       aggft-simulate-fig-p
     ];
+    LOCALE_ARCHIVE = "${pkgs.glibcLocales}/lib/locale/locale-archive";
   };
 }
