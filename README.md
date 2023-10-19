@@ -2,11 +2,14 @@
 
 ## TODOs
 
-- Add installation section to the README.
+- Complete installation section to the README.
 - Add compression/decompression section to README.
-- Run simulations with standard cryptographic key lengths (now we use short
-  keys).
-- Benchmark basic computational operations (formulas in paper).
+
+## Installation
+
+1. Install the [Nix Package Manager][nix-home].
+2. Enable [Flakes][flake-wiki].
+3. TODO
 
 ## Usage
 
@@ -50,3 +53,6 @@ However, the first and second reason should not greatly impact the results. To
 tackle the third reason, the simulation package reports any issues with timouts
 in the generated results. If you have such issues, you can run smaller-scale
 simulations, or relax the time limits.
+
+[nix-home]: https://nixos.org/
+[flake-wiki]: https://nixos.wiki/wiki/Flakes
