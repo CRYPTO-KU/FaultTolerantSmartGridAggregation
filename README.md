@@ -1,15 +1,18 @@
 # AggFT Implementation
 
-## TODOs
-
-- Complete installation section to the README.
-- Add compression/decompression section to README.
-
 ## Installation
 
 1. Install the [Nix Package Manager][nix-home].
 2. Enable [Flakes][flake-wiki].
-3. TODO
+3. List available packages with:
+   ```bash
+    nix flake show github:CRYPTO-KU/FaultTolerantSmartGridAggregation
+   ```
+4. Get a package in a temporary shell:
+   ```bash
+   nix shell github:CRYPTO-KU/FaultTolerantSmartGridAggregation#aggft-simulate
+   # Now you can run `aggft-sim`
+   ```
 
 ## Usage
 
@@ -53,6 +56,15 @@ However, the first and second reason should not greatly impact the results. To
 tackle the third reason, the simulation package reports any issues with timouts
 in the generated results. If you have such issues, you can run smaller-scale
 simulations, or relax the time limits.
+
+## Results
+
+Results in the [results](results) directory are CSV files compressed with 7z.
+You can uncompress them using:
+
+```bash
+7z x $FILENAME
+```
 
 [nix-home]: https://nixos.org/
 [flake-wiki]: https://nixos.wiki/wiki/Flakes
